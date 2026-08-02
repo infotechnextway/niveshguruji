@@ -1,0 +1,94 @@
+{
+  "name": "pts-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RIDGELINE CAPITAL — backend platform (api + engine)",
+  "scripts": {
+    "build": "nest build api && nest build engine",
+    "start:api": "node dist/apps/api/apps/api/src/main.js",
+    "start:engine": "node dist/apps/engine/apps/engine/src/main.js",
+    "start:api:dev": "nest start api --watch",
+    "start:engine:dev": "nest start engine --watch",
+    "seed:config": "ts-node -r tsconfig-paths/register scripts/seed-config.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:cov": "jest --coverage",
+    "generate:keys": "ts-node scripts/generate-keys.ts",
+    "seed:admin": "ts-node -r tsconfig-paths/register scripts/seed-admin.ts",
+    "test:e2e": "jest --config test/e2e/jest-e2e.json --runInBand",
+    "seed:instruments": "ts-node -r tsconfig-paths/register scripts/seed-instruments.ts",
+    "seed:trader": "ts-node -r tsconfig-paths/register scripts/seed-trader.ts",
+    "bootstrap:dev": "ts-node -r tsconfig-paths/register scripts/bootstrap-dev.ts",
+    "sync:instruments": "ts-node -r tsconfig-paths/register scripts/sync-instruments.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.0",
+    "@nestjs/config": "^3.2.0",
+    "@nestjs/core": "^10.4.0",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/mongoose": "^10.0.10",
+    "@nestjs/platform-express": "^10.4.0",
+    "@nestjs/platform-ws": "^10.4.22",
+    "@nestjs/throttler": "^6.2.0",
+    "@nestjs/websockets": "^10.4.22",
+    "argon2": "^0.45.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.4.1",
+    "mongoose": "^8.5.0",
+    "nestjs-pino": "^4.1.0",
+    "nodemailer": "^9.0.3",
+    "otplib": "^12.0.1",
+    "pino": "^9.3.0",
+    "pino-http": "^10.2.0",
+    "protobufjs": "^7.4.0",
+    "razorpay": "^2.9.8",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.4.0",
+    "@nestjs/schematics": "^10.1.0",
+    "@nestjs/testing": "^10.4.0",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^20.14.0",
+    "@types/nodemailer": "^8.0.1",
+    "@types/supertest": "^7.2.1",
+    "@types/ws": "^8.18.1",
+    "jest": "^29.7.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.2.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.5.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "libs/**/*.ts",
+      "apps/**/*.ts"
+    ],
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
+    },
+    "setupFiles": [
+      "<rootDir>/test/jest.setup.ts"
+    ]
+  }
+}

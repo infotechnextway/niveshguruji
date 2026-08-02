@@ -1,0 +1,10 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "../..",
+  "testRegex": "test/e2e/.*\\.e2e-spec\\.ts$",
+  "transform": { "^.+\\.ts$": "ts-jest" },
+  "moduleNameMapper": { "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1" },
+  "setupFiles": ["<rootDir>/test/e2e/setup-e2e.ts"],
+  "testEnvironment": "node",
+  "testTimeout": 30000
+}
