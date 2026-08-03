@@ -18,7 +18,8 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
 
   const port = config.getOrThrow<number>('API_PORT');
-  await app.listen(port, '0.0.0.0');
+  // Default loopback for local dev; set HOST=0.0.0.0 in Docker/VPS.
+  await app.listen(port, process.env.HOST || '127.0.0.1');
 }
 
 void bootstrap();

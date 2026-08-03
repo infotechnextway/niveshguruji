@@ -107,20 +107,35 @@ export class UpstoxHistoryClient {
   }
 }
 
+/**
+ * Upstox V2 candle row: [timestamp, open, high, low, close, volume, oi?]
+ * Timestamp may be ISO string (IST) or epoch. OHLC must never be swapped with volume/OI.
+ */
 export function parseCandles(body: UpstoxCandleResponse): HistoryCandle[] {
   const raw = body?.data?.candles ?? [];
   const out: HistoryCandle[] = [];
   for (const row of raw) {
     if (!Array.isArray(row) || row.length < 5) continue;
-    const t = typeof row[0] === 'number' ? row[0] : Date.parse(String(row[0]));
-    if (Number.isNaN(t)) continue;
+    let t = typeof row[0] === 'number' ? row[0] : Date.parse(String(row[0]));
+    if (!Number.isFinite(t) || Number.isNaN(t)) continue;
+    // Seconds → milliseconds (Unix sec is ~1e9; ms is ~1e12).
+    if (t > 0 && t < 1e11) t *= 1000;
+
+    const o = Number(row[1]);
+    const h = Number(row[2]);
+    const l = Number(row[3]);
+    const c = Number(row[4]);
+    const v = Number(row[5] ?? 0);
+    if (![o, h, l, c].every((n) => Number.isFinite(n) && n > 0)) continue;
+    if (h < l || h < Math.max(o, c) || l > Math.min(o, c)) continue;
+
     out.push({
       t,
-      o: Number(row[1]),
-      h: Number(row[2]),
-      l: Number(row[3]),
-      c: Number(row[4]),
-      v: Number(row[5] ?? 0),
+      o,
+      h: Math.max(h, o, c),
+      l: Math.min(l, o, c),
+      c,
+      v: Number.isFinite(v) && v > 0 ? v : 0,
     });
   }
   return out;

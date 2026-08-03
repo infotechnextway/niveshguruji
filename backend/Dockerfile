@@ -12,7 +12,7 @@ RUN npm run build
 
 # ---- runtime stage ----
 FROM node:20-alpine AS runtime
-ENV NODE_ENV=production TZ=Asia/Kolkata
+ENV NODE_ENV=production TZ=Asia/Kolkata HOST=0.0.0.0
 WORKDIR /app
 RUN addgroup -S app && adduser -S app -G app
 COPY package.json package-lock.json* ./
