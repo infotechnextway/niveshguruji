@@ -5,7 +5,7 @@ import { WatchlistService } from '../application/watchlist.service';
 import { UserAuthGuard } from '../../auth/presentation/jwt-auth.guard';
 import { CurrentPrincipal } from '../../auth/presentation/current-principal.decorator';
 import { AccessTokenClaims } from '../../auth/domain/auth.types';
-import { WatchlistItemDto, WatchlistParamDto, WatchlistReorderDto } from './dto/market.dtos';
+import { WatchlistItemDto, WatchlistItemParamDto, WatchlistParamDto, WatchlistReorderDto } from './dto/market.dtos';
 
 type Tab = string;
 
@@ -64,8 +64,8 @@ export class WatchlistController {
   }
 
   @Delete(':tab/:instrumentKey')
-  async remove(@CurrentPrincipal() p: AccessTokenClaims, @Param() param: WatchlistParamDto, @Param('instrumentKey') key: string) {
-    return unwrap(await this.watchlist.remove(p.sub, param.tab as Tab, decodeURIComponent(key)));
+  async remove(@CurrentPrincipal() p: AccessTokenClaims, @Param() param: WatchlistItemParamDto) {
+    return unwrap(await this.watchlist.remove(p.sub, param.tab as Tab, decodeURIComponent(param.instrumentKey)));
   }
 
   @Put(':tab/reorder')

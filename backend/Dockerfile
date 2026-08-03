@@ -2,7 +2,8 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN apk add --no-cache python3 make g++ \
+    && npm ci
 COPY tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY apps ./apps
 COPY libs ./libs
@@ -15,7 +16,10 @@ ENV NODE_ENV=production TZ=Asia/Kolkata
 WORKDIR /app
 RUN addgroup -S app && adduser -S app -G app
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN apk add --no-cache --virtual .build-deps python3 make g++ \
+    && npm ci --omit=dev \
+    && apk del .build-deps \
+    && npm cache clean --force
 COPY --from=build /app/dist ./dist
 USER app
 # APP_PROCESS selects which process this container runs: api | engine

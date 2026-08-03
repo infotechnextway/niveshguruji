@@ -4,6 +4,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import Redis from 'ioredis';
 import { E2E_ENABLED } from './setup-e2e';
 import type { Quote } from '@app/shared';
+import { ExchangeCalendarService } from '@app/shared';
 
 const describeE2E = E2E_ENABLED ? describe : describe.skip;
 
@@ -43,13 +44,9 @@ describeE2E('Trading engine replay (e2e)', () => {
     redis = app.get<Redis>(REDIS_CLIENT);
     execution = app.get(ExecutionService);
 
-    // Force EQ market open for the test regardless of wall-clock via config override
-    // (market window widened to full day so the calendar reports open).
-    await db.collection('app_config').updateOne(
-      { key: 'market.window.EQ' },
-      { $set: { key: 'market.window.EQ', value: { open: '00:00', close: '23:59' }, updatedBy: 'e2e' } },
-      { upsert: true },
-    );
+    // Trading replay must be deterministic regardless of wall-clock, weekends,
+    // or holidays. Calendar behavior has its own unit tests.
+    jest.spyOn(app.get(ExchangeCalendarService), 'isMarketOpen').mockReturnValue(true);
 
     await db.collection('instruments').insertOne({
       instrumentKey: instKey, symbol: `RPL${unique}`, name: 'Replay Co', exchange: 'NSE', segment: 'EQ',
@@ -69,7 +66,6 @@ describeE2E('Trading engine replay (e2e)', () => {
     for (const c of ['instruments', 'challenges', 'orders', 'positions', 'trades', 'ledger_entries', 'holdings']) {
       await db.collection(c).deleteMany({ $or: [{ instrumentKey: instKey }, { challengeId: new Types.ObjectId(challengeId) }, { userId }] });
     }
-    await db.collection('app_config').updateOne({ key: 'market.window.EQ' }, { $set: { value: { open: '09:15', close: '15:30' } } });
     await app.close();
   });
 

@@ -43,6 +43,10 @@ export class WatchlistParamDto {
   @IsIn(TABS) tab!: (typeof TABS)[number];
 }
 
+export class WatchlistItemParamDto extends WatchlistParamDto {
+  @IsString() @Length(3, 120) instrumentKey!: string;
+}
+
 export class WatchlistItemDto {
   @IsString() @Length(3, 120) instrumentKey!: string;
 }
