@@ -119,7 +119,7 @@ export function PositionsView() {
       <TradeToast message={toast} onDone={() => setToast(null)} />
       <style jsx>{`
         .pv { display: flex; flex-direction: column; gap: 16px; }
-        .total { text-align: right; align-self: flex-end; }
+        .total { text-align: center; align-self: center; width: 100%; }
         .total span { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); }
         .total strong { font-size: 22px; font-weight: 500; }
         .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: auto; }
