@@ -46,7 +46,7 @@ export function HoldingsView() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card table-wrap">
         <table>
           <thead>
             <tr>
@@ -77,6 +77,41 @@ export function HoldingsView() {
           </tbody>
         </table>
       </div>
+
+      <div className="cards" aria-label="Holdings">
+        {rows.map((h) => (
+          <article key={h.instrumentKey} className="hold-card">
+            <div className="hc-top">
+              <strong>{h.symbol}</strong>
+              <span className={`num ${signClass(h.overall)}`}>
+                {h.overall >= 0 ? '+' : ''}{h.overall.toFixed(2)}
+              </span>
+            </div>
+            <div className="hc-sub muted">Qty {h.qty} · {pct(((h.ltp - h.avgPrice) / h.avgPrice) * 100)}</div>
+            <div className="hc-grid">
+              <div>
+                <span className="lbl">Avg</span>
+                <strong className="num">{price(h.avgPrice)}</strong>
+              </div>
+              <div>
+                <span className="lbl">LTP</span>
+                <strong className="num">{price(h.ltp)}</strong>
+              </div>
+              <div>
+                <span className="lbl">Value</span>
+                <strong className="num">{price(h.value)}</strong>
+              </div>
+              <div>
+                <span className="lbl">Today</span>
+                <strong className={`num ${signClass(h.today)}`}>
+                  {h.today >= 0 ? '+' : ''}{h.today.toFixed(2)}
+                </strong>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
       <style jsx>{`
         .hv { display: flex; flex-direction: column; gap: 16px; }
         .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -92,7 +127,29 @@ export function HoldingsView() {
         th.r, td.r { text-align: right; }
         .tiny { font-size: 10px; margin-top: 2px; }
         .muted { color: var(--text-faint); }
-        @media (max-width: 700px) { .stats { grid-template-columns: 1fr; } }
+        .cards { display: none; }
+
+        @media (max-width: 700px) {
+          .stats { grid-template-columns: 1fr; }
+          .table-wrap { display: none; }
+          .cards { display: flex; flex-direction: column; gap: 10px; }
+          .hold-card {
+            background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+            padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;
+          }
+          .hc-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+          .hc-top strong { font-size: 14px; font-weight: 600; }
+          .hc-sub { font-size: 11px; }
+          .hc-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px;
+            margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--line-soft);
+          }
+          .hc-grid .lbl {
+            display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-faint); margin-bottom: 2px;
+          }
+          .hc-grid strong { font-size: 13px; font-weight: 500; }
+        }
       `}</style>
     </div>
   );

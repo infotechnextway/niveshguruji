@@ -861,6 +861,13 @@ button.bottom-nav__item {
     max-height: none;
     border-right: none;
     border-bottom: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+  .wt--mobile-list .wt-list {
+    overflow-x: hidden;
   }
   .wt--mobile-list .wt-center {
     display: none !important;
