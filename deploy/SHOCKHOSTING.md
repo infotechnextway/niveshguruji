@@ -202,9 +202,31 @@ docker compose start nginx
 ## Useful commands
 
 ```bash
-cd ~/simulatortrade_new/deploy   # or your clone path
+cd /opt/simulatortrade_new/deploy
 docker compose logs -f api engine web nginx
 docker compose restart api engine
 docker compose down              # stop stack (keeps volumes)
 docker compose up -d --build     # rebuild + start
 ```
+
+## Auto-deploy (GitHub Actions)
+
+On every push to `main`, `.github/workflows/deploy-vps.yml` SSHs into this VPS, pulls `main`, and runs `docker compose build && up -d`.
+
+### One-time GitHub secrets
+
+Repo → **Settings → Secrets and variables → Actions → New repository secret**:
+
+| Secret | Value |
+|---|---|
+| `VPS_HOST` | `103.20.235.196` |
+| `VPS_USER` | `root` |
+| `VPS_SSH_KEY` | contents of `/root/github-actions-deploy.pem` on the VPS |
+
+```bash
+ssh root@103.20.235.196 'cat /root/github-actions-deploy.pem'
+```
+
+Paste the full key (including `BEGIN` / `END` lines) into `VPS_SSH_KEY`.
+
+Manual run: **Actions → Deploy VPS → Run workflow**.
