@@ -1,5 +1,5 @@
 'use client';
-import { getSession, getEmployeeSession, clearSession, clearEmployeeSession, isDemoMode } from './auth';
+import { getSession, getEmployeeSession, clearSession, clearEmployeeSession, isDemoMode, isDemoSession } from './auth';
 
 const BASE = '/api/v1';
 
@@ -118,7 +118,7 @@ export async function api<T>(
         if (adminRoute) {
           clearEmployeeSession();
           redirectAdminLogin();
-        } else {
+        } else if (!isDemoSession()) {
           clearSession();
           redirectTraderLogin();
         }

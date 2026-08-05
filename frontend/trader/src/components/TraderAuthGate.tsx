@@ -1,16 +1,17 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { getSession } from '@/lib/auth';
+import { getSession, isDemoSession } from '@/lib/auth';
 
-/** Redirects unauthenticated visitors to trader login before market API calls run. */
+/** Redirects unauthenticated visitors to trader login before market API calls run.
+ *  Explicit demo mode (login → “Try the demo dashboard”) is allowed without a JWT. */
 export function TraderAuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (getSession()) {
+    if (getSession() || isDemoSession()) {
       setReady(true);
       return;
     }

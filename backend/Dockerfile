@@ -14,7 +14,8 @@ RUN npm run build
 FROM node:20-alpine AS runtime
 ENV NODE_ENV=production TZ=Asia/Kolkata HOST=0.0.0.0
 WORKDIR /app
-RUN addgroup -S app && adduser -S app -G app
+RUN addgroup -S app && adduser -S app -G app \
+    && apk add --no-cache wget
 COPY package.json package-lock.json* ./
 RUN apk add --no-cache --virtual .build-deps python3 make g++ \
     && npm ci --omit=dev \

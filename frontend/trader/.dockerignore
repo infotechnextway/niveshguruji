@@ -1,0 +1,10 @@
+node_modules
+.next
+.env
+.env.local
+.env.*.local
+*.md
+.git
+pts-trader-cpanel
+coverage
+out
