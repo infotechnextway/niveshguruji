@@ -1,12 +1,12 @@
 {
-  "name": "RIDGELINE CAPITAL — Paper Trading",
-  "short_name": "RIDGELINE",
+  "name": "Nivesh Guru — Paper Trading",
+  "short_name": "Nivesh Guru",
   "description": "Practice trading Indian markets and prove your edge through structured evaluations.",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#2D5FE8",
+  "theme_color": "#133A2A",
   "background_color": "#F7F8FA",
   "icons": [
     {

@@ -14,7 +14,7 @@ export default function SettingsPage() {
           <section className="card-lg">
             <div className="sec-head">
               <h3>Appearance</h3>
-              <p className="dim">Choose how RIDGELINE CAPITAL looks to you. The change applies immediately.</p>
+              <p className="dim">Choose how Nivesh Guru looks to you. The change applies immediately.</p>
             </div>
             <div className="theme-picker">
               {(['light','dark'] as const).map((t) => (

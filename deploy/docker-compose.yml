@@ -1,4 +1,4 @@
-# RIDGELINE CAPITAL — full-stack VPS (ShockHosting 2GB-safe defaults)
+# Nivesh Guru — full-stack VPS (ShockHosting 2GB-safe defaults)
 # MongoDB is external (Atlas). Copy .env.example to .env first.
 # First boot uses HTTP (site.http.conf). Switch to TLS per SHOCKHOSTING.md.
 services:

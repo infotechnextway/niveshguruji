@@ -38,11 +38,11 @@ export function AppSidebar({
       aria-label="Primary"
     >
       <div className="pts-sidebar__top">
-        <Link href="/dashboard" className="pts-sidebar__brand" aria-label="RIDGELINE CAPITAL home" onClick={onNavigate}>
+        <Link href="/dashboard" className="pts-sidebar__brand" aria-label="Nivesh Guru home" onClick={onNavigate}>
           <span className="pts-sidebar__mark" aria-hidden />
           <span className="pts-sidebar__brand-text">
-            <span className="pts-sidebar__brand-name">RIDGELINE</span>
-            <span className="pts-sidebar__brand-sub">CAPITAL</span>
+            <span className="pts-sidebar__brand-name">NIVESH<span className="brand-guru">GURU</span></span>
+            <span className="pts-sidebar__brand-sub">INVESTMENT SIMPLIFIED</span>
           </span>
         </Link>
         <button

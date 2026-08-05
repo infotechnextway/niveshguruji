@@ -67,10 +67,10 @@ function LoginInner() {
       <div className="lp-tt"><ThemeToggle /></div>
       <div className="lp-card card-lg">
         <div className="lp-brand">
-          <span className="brand-mark" aria-hidden />
+          <img className="brand-mark" src="/icons/icon-192.png" alt="" width={36} height={36} />
           <div className="vstack">
-            <span className="brand-name">RIDGELINE CAPITAL</span>
-            <span className="brand-tag">Paper trading · Structured evaluations</span>
+            <span className="brand-name">NIVESH<span className="brand-guru">GURU</span></span>
+            <span className="brand-tag">Investment simplified · Paper trading</span>
           </div>
         </div>
         <h1 className="lp-title">Welcome back</h1>
@@ -104,9 +104,9 @@ function LoginInner() {
         .lp-tt { position: absolute; top: 24px; right: 24px; }
         .lp-card { width: 100%; max-width: 400px; padding: 32px; display: flex; flex-direction: column; gap: 16px; }
         .lp-brand { display: flex; align-items: center; gap: 12px; padding-bottom: 8px; }
-        .brand-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); position: relative; }
-        .brand-mark::after { content: ''; position: absolute; inset: 7px 7px auto auto; width: 6px; height: 6px; background: var(--panel); border-radius: 50%; }
-        .brand-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+        .brand-mark { width: 36px; height: 36px; border-radius: 9px; display: block; object-fit: cover; }
+        .brand-name { font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
+        .brand-guru { color: var(--brand-gold, #C69C27); }
         .brand-tag { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
         .lp-title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
         .lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
