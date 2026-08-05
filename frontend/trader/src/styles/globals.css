@@ -288,8 +288,10 @@ html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__top {
   padding: 12px 8px;
 }
 html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__brand {
-  flex: 0;
+  flex: 0 0 auto;
   justify-content: center;
+  overflow: visible;
+  width: 32px;
 }
 html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__item {
   justify-content: center;
