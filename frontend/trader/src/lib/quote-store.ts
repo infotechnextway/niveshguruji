@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import type { Quote } from './types';
 import { api } from './api';
-import { getDataFeed } from './market/datafeed';
+import { getDataFeed, setLiveBarsEnabled } from './market/datafeed';
 
 type QuoteStatus = 'idle' | 'connecting' | 'live' | 'snapshot' | 'error';
 
@@ -43,9 +43,7 @@ function fetchMarketStatus(): void {
       marketOpen = s.eqOpen;
       useQuotes.setState({ marketOpen: s.eqOpen });
       // Keep chart/datafeed in sync so bars freeze when cash market closes.
-      void import('./market/datafeed').then(({ setLiveBarsEnabled }) => {
-        setLiveBarsEnabled(s.eqOpen);
-      });
+      setLiveBarsEnabled(s.eqOpen);
       if (wasOpen !== s.eqOpen) {
         ensureSnapshotPolling([...useQuotes.getState().subscribed]);
       }
