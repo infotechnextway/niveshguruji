@@ -104,11 +104,14 @@ export class SwitchableMarketFeed implements MarketFeed {
     const mode = this.feedMode.getFeedMode();
     if (mode === 'simulator') return this.simulator;
 
-    const primary = this.pickFeedForMode(mode);
-    if (primary) return primary;
+    // Honor the configured live provider even before credentials finish loading.
+    // Falling back to simulator here briefly floods traders with fake ticks and
+    // keeps charts moving after the cash market is closed.
+    if (mode === 'upstox') return this.upstox;
+    if (mode === 'angel') return this.angel;
+    if (mode === 'dhan') return this.dhan;
 
     for (const alt of LIVE_MODES) {
-      if (alt === mode) continue;
       const feed = this.pickFeedForMode(alt);
       if (feed) return feed;
     }

@@ -52,6 +52,14 @@ type SearchCallback = (items: Array<{
 const CHART_DEBUG = typeof process !== 'undefined'
   && process.env.NEXT_PUBLIC_CHART_DEBUG === '1';
 
+/** When false, WS ticks still fan out to quote handlers but do not mutate chart bars. */
+let liveBarsEnabled = false;
+
+/** Called from quote-store when /market/status reports eqOpen. */
+export function setLiveBarsEnabled(enabled: boolean): void {
+  liveBarsEnabled = enabled;
+}
+
 function wsUrl(): string {
   if (typeof window === 'undefined') return '';
   const env = process.env.NEXT_PUBLIC_WS_URL;
@@ -417,9 +425,11 @@ export class UpstoxDataFeed {
    * - same timestamp → mutate OHLC of current candle
    * - newer timestamp → open a new candle
    * - older timestamp → ignore (never rewrite history)
+   * Bars are frozen when the cash market is closed (see setLiveBarsEnabled).
    */
   private handleQuote(q: Quote): void {
     for (const h of this.quoteHandlers) h(q);
+    if (!liveBarsEnabled) return;
     if (!Number.isFinite(q.ltp) || q.ltp <= 0) return;
 
     for (const sub of this.barSubs.values()) {
