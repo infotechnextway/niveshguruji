@@ -63,6 +63,20 @@ redis-cli publish config:invalidate market.window.EQ
 (`AppConfigService` caches config in memory at boot and only reloads a key when it receives
 that `config:invalidate` message.)
 
+### Live market data (WebSocket)
+
+Live quotes come from the **engine** `/ws` (port 4100); REST snapshots come from the API
+(`/market/quotes`, proxied via `/api`). When the app is viewed through a single
+forwarded/proxied web port (the usual cloud case), the browser cannot reach `localhost:4100`
+directly, so live ticks silently fail and only static REST snapshots show. To fix this,
+`frontend/trader/next.config.mjs` proxies same-origin `/ws` → engine (mirrors prod nginx),
+and `NEXT_PUBLIC_WS_URL` is left **unset** in `.env.local` so the datafeed falls back to
+`ws://<host>/ws`. Do not re-add `NEXT_PUBLIC_WS_URL=ws://localhost:4100/ws` in a
+forwarded-port setup — that hardcodes an unreachable host and kills live data. `next dev`
+must be restarted after editing `next.config.mjs`. Live data also requires an open market
+window (see above) since when `eqOpen` is false the UI prefers REST last-close snapshots
+over WS ticks.
+
 ### Dev credentials (after seeding)
 
 - Trader: `trader@test.local` / `TestPass123!`
