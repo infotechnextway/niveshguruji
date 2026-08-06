@@ -46,7 +46,13 @@ export class AngelOneFeed implements MarketFeed {
     this.stopped = false;
     this.unsubCreds = this.credentials.onChange(() => {
       this.logger.log('Angel credentials changed — reconnecting feed');
-      this.ws?.close();
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.close();
+        return;
+      }
+      if (!this.stopped && this.credentials.isConfigured()) {
+        void this.connect();
+      }
     });
     if (!this.credentials.isConfigured()) {
       this.logger.warn('Angel feed started without full credentials — waiting for admin setup');

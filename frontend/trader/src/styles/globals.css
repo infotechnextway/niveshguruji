@@ -334,8 +334,10 @@ html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__item {
 }
 .pts-sidebar__brand:hover { text-decoration: none; color: var(--text); }
 .pts-sidebar[data-collapsed='true'] .pts-sidebar__brand {
-  flex: 0;
+  flex: 0 0 auto;
   justify-content: center;
+  overflow: visible;
+  width: 32px;
 }
 
 .pts-sidebar__mark {
@@ -343,6 +345,7 @@ html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__item {
   height: 32px;
   border-radius: 8px;
   flex-shrink: 0;
+  display: block;
   background: url('/icons/icon-192.png') center / cover no-repeat;
   position: relative;
 }

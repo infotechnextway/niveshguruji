@@ -69,6 +69,7 @@ export class UpstoxCredentialsService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     await this.reload();
+    this.emitChange();
     await this.subscriber.subscribe(INVALIDATE_CHANNEL);
     this.subscriber.on('message', (channel) => {
       if (channel !== INVALIDATE_CHANNEL) return;

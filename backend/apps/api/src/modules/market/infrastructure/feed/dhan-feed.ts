@@ -50,7 +50,13 @@ export class DhanFeed implements MarketFeed {
     this.stopped = false;
     this.unsubCreds = this.credentials.onChange(() => {
       this.logger.log('Dhan credentials changed — reconnecting feed');
-      this.ws?.close();
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.close();
+        return;
+      }
+      if (!this.stopped && this.credentials.isConfigured()) {
+        void this.connect();
+      }
     });
     if (!this.credentials.isConfigured()) {
       this.logger.warn('Dhan feed started without credentials — waiting for admin setup');

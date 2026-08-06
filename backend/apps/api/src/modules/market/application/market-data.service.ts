@@ -9,6 +9,10 @@ import {
 import { Candle1m } from '../infrastructure/schemas/candle.schema';
 import { MARKET_FEED, MarketFeed } from '../infrastructure/feed/market-feed.port';
 import { CandleAggregator } from '../domain/candle-aggregator';
+import { MarketFeedModeService } from './market-feed-mode.service';
+import { DhanCredentialsService } from './dhan-credentials.service';
+import { UpstoxCredentialsService } from './upstox-credentials.service';
+import { AngelCredentialsService } from './angel-credentials.service';
 
 const QUOTE_TTL_SECONDS = 24 * 60 * 60;
 
@@ -38,7 +42,17 @@ export class MarketDataService implements OnModuleInit, OnModuleDestroy {
     @Inject(EVENT_BUS) private readonly bus: EventBus,
     private readonly calendar: ExchangeCalendarService,
     private readonly appConfig: AppConfigService,
-  ) {}
+    // Injected so Nest runs credential/mode onModuleInit before the pipeline starts.
+    private readonly feedMode: MarketFeedModeService,
+    private readonly dhanCreds: DhanCredentialsService,
+    private readonly upstoxCreds: UpstoxCredentialsService,
+    private readonly angelCreds: AngelCredentialsService,
+  ) {
+    void this.feedMode;
+    void this.dhanCreds;
+    void this.upstoxCreds;
+    void this.angelCreds;
+  }
 
   async onModuleInit(): Promise<void> {
     this.feed.onTick((q) => void this.handleTick(q));

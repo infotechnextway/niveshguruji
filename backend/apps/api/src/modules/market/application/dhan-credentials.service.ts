@@ -79,6 +79,8 @@ export class DhanCredentialsService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     await this.reload();
+    // Notify feeds that started before credentials finished loading.
+    this.emitChange();
     await this.subscriber.subscribe(INVALIDATE_CHANNEL);
     this.subscriber.on('message', (channel) => {
       if (channel !== INVALIDATE_CHANNEL) return;
