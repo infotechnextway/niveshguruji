@@ -32,6 +32,8 @@ export class MarketFeedModeService implements OnModuleInit, OnModuleDestroy {
   ) {
     const env = (config.get<string>('MARKET_FEED') || 'simulator') as MarketFeedMode;
     this.envMode = (MARKET_FEED_MODES as readonly string[]).includes(env) ? env : 'simulator';
+    // Prefer env until DB reload finishes — avoids boot race leaving the engine on simulator.
+    this.feedMode = this.envMode;
   }
 
   async onModuleInit(): Promise<void> {
