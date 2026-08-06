@@ -116,11 +116,21 @@ export function clearEmployeeSession(): void {
   localStorage.removeItem(K_EMP_USER);
 }
 
+/** True when the user clicked “Try the demo dashboard” (explicit flag). */
+export function isDemoSession(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(K_DEMO) === '1';
+}
+
+/** Demo UI or no trader token yet (used by pages that render static demo data). */
 export function isDemoMode(): boolean {
   if (typeof window === 'undefined') return false;
-  return localStorage.getItem(K_DEMO) === '1' || !localStorage.getItem(K_ACCESS);
+  return isDemoSession() || !localStorage.getItem(K_ACCESS);
 }
-export function enterDemoMode(): void { localStorage.setItem(K_DEMO, '1'); }
+export function enterDemoMode(): void {
+  clearSession();
+  localStorage.setItem(K_DEMO, '1');
+}
 export function exitDemoMode(): void { localStorage.removeItem(K_DEMO); }
 
 /** True when a valid employee JWT is stored for admin API calls. */

@@ -30,7 +30,13 @@ export class UpstoxFeed implements MarketFeed {
     }
     this.unsubCreds = this.credentials.onChange(() => {
       this.logger.log('Upstox credentials changed — reconnecting feed');
-      this.ws?.close();
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.close();
+        return;
+      }
+      if (!this.stopped && this.credentials.getAccessToken()) {
+        void this.connect();
+      }
     });
     if (!this.credentials.getAccessToken()) {
       this.logger.warn('Upstox feed started without access token — waiting for admin setup');

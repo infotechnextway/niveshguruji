@@ -13,6 +13,11 @@ import {
   UpstoxCandleInterval,
   UpstoxHistoryClient,
 } from '../infrastructure/upstox-history.client';
+import {
+  DhanHistoryClient,
+  dhanReturnsNativeInterval,
+  resolveDhanChartTarget,
+} from '../infrastructure/dhan-history.client';
 import { Candle1m } from '../infrastructure/schemas/candle.schema';
 import {
   catalogBrowseSortStages,
@@ -20,6 +25,12 @@ import {
 } from '../infrastructure/catalog-aggregation';
 import { traderCatalogMatch } from '../infrastructure/trader-catalog';
 import { isUpstoxInstrumentKey, resolveOptionUnderlyingKey } from '../infrastructure/option-underlying';
+import {
+  aggregateFrom1m,
+  istDayStartMs,
+  mergeRemotePreferring,
+  sanitizeHistoryCandles,
+} from '../domain/candle-sanitize';
 
 const SEARCH_PROJECTION = 'instrumentKey symbol name exchange segment lotSize tickSize expiry strike optType underlyingKey';
 const UPSTOX_KEY_PREFIX = /^(NSE|BSE)_/;
@@ -33,6 +44,7 @@ export class InstrumentService {
     @InjectModel(Candle1m.name) private readonly candleModel: Model<Candle1m>,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
     private readonly history: UpstoxHistoryClient,
+    private readonly dhanHistory: DhanHistoryClient,
   ) {}
 
   async getByKey(instrumentKey: string) {
@@ -164,8 +176,9 @@ export class InstrumentService {
   }
 
   /**
-   * Candles for charting: Upstox historical (+ intraday) backfill, optionally
-   * upsert 1m into Mongo, merge with any live aggregated bars already stored.
+   * Candles for charting: prefer Dhan charts API (live feed source), then
+   * Upstox historical backfill, optionally upsert 1m into Mongo, merge with
+   * any live aggregated bars already stored.
    */
   async candles(
     instrumentKey: string,
@@ -178,13 +191,38 @@ export class InstrumentService {
     if (!inst) return Result.fail(DomainError.of('NOT_FOUND', 'Instrument not found'));
 
     const historyKey = await this.resolveHistoryKey(instrumentKey, inst);
-    const upstoxInterval = mapUiInterval(interval);
-    const fetchInterval = aggregatesFrom1m(upstoxInterval) ? '1minute' : upstoxInterval;
+    const uiInterval = mapUiInterval(interval);
     let remote: HistoryCandle[] = [];
+    let remoteNativeTf = false; // Dhan returned 5/15/60/day natively — don't re-aggregate
+    let fetched1m = false;
 
-    if (this.history.hasToken()) {
+    const dhanTarget = resolveDhanChartTarget(instrumentKey, inst);
+    if (this.dhanHistory.hasToken() && dhanTarget) {
+      try {
+        remote = await this.dhanHistory.fetchCandles(dhanTarget, uiInterval, from, to);
+        if (remote.length) {
+          remoteNativeTf = dhanReturnsNativeInterval(uiInterval);
+          fetched1m = uiInterval === '1minute';
+          this.logger.debug(
+            `Dhan history ${remote.length} bars for ${instrumentKey} `
+            + `(${dhanTarget.exchangeSegment}:${dhanTarget.securityId} ${uiInterval})`,
+          );
+        }
+      } catch (err) {
+        this.logger.warn(
+          `Dhan history failed for ${instrumentKey} `
+          + `(${dhanTarget.exchangeSegment}:${dhanTarget.securityId}): ${(err as Error).message}`,
+        );
+      }
+    }
+
+    // Fall back to Upstox when Dhan unavailable / empty (needs Upstox instrument_key).
+    if (!remote.length && this.history.hasToken() && !historyKey.startsWith('DHAN|')) {
+      const fetchInterval = aggregatesFrom1m(uiInterval) ? '1minute' : uiInterval;
       try {
         remote = await this.history.fetchCandles(historyKey, fetchInterval, from, to);
+        fetched1m = fetchInterval === '1minute';
+        remoteNativeTf = !aggregatesFrom1m(uiInterval);
       } catch (err) {
         this.logger.warn(
           `Upstox history failed for ${instrumentKey} (historyKey=${historyKey}): ${(err as Error).message}`,
@@ -192,7 +230,7 @@ export class InstrumentService {
       }
     }
 
-    if (fetchInterval === '1minute' && remote.length) {
+    if (fetched1m && remote.length) {
       const ops = remote.map((c) => ({
         updateOne: {
           filter: { instrumentKey, ts: c.t },
@@ -210,30 +248,36 @@ export class InstrumentService {
     }
 
     let merged = remote;
-    if (upstoxInterval === '1minute') {
+    if (uiInterval === '1minute') {
       merged = await this.mergeLocalCandles(instrumentKey, historyKey, from, to, limit, remote);
-    } else if (aggregatesFrom1m(upstoxInterval)) {
-      const local1m = await this.mergeLocalCandles(instrumentKey, historyKey, from, to, limit * 60, remote);
-      merged = aggregateFrom1m(local1m.length ? local1m : remote, upstoxInterval);
+    } else if (remoteNativeTf && remote.length) {
+      // Dhan (or Upstox day) already returned the requested timeframe — keep as-is.
+      merged = remote;
+    } else if (aggregatesFrom1m(uiInterval) || uiInterval === '30minute') {
+      const local1m = await this.mergeLocalCandles(
+        instrumentKey, historyKey, from, to, limit * 60, fetched1m ? remote : [],
+      );
+      merged = aggregateFrom1m(local1m.length ? local1m : remote, uiInterval);
     } else if (!merged.length) {
       const local1m = await this.loadLocal1m(instrumentKey, historyKey, from, to, limit);
-      merged = aggregateFrom1m(local1m, upstoxInterval);
+      merged = aggregateFrom1m(local1m, uiInterval);
     }
 
-    if (!merged.length && !this.history.hasToken()) {
-      if (upstoxInterval === '1minute') {
+    if (!merged.length && !this.history.hasToken() && !this.dhanHistory.hasToken()) {
+      if (uiInterval === '1minute') {
         merged = await this.loadLocal1m(instrumentKey, historyKey, from, to, limit);
       } else {
         const local1m = await this.loadLocal1m(instrumentKey, historyKey, from, to, limit * 60);
-        merged = aggregateFrom1m(local1m, upstoxInterval);
+        merged = aggregateFrom1m(local1m, uiInterval);
       }
     }
 
     if (!merged.length) {
-      merged = await this.syntheticCandles(instrumentKey, historyKey, from, to, upstoxInterval, limit);
+      merged = await this.syntheticCandles(instrumentKey, historyKey, from, to, uiInterval, limit);
     }
 
-    return Result.ok(merged.slice(-limit));
+    const clean = sanitizeHistoryCandles(merged, from, to);
+    return Result.ok(clean.slice(-limit));
   }
 
   /** Flat bars from reference close, cached quote, or last Mongo close. */
@@ -405,10 +449,9 @@ export class InstrumentService {
     remote: HistoryCandle[],
   ): Promise<HistoryCandle[]> {
     const local = await this.loadLocal1m(instrumentKey, historyKey, from, to, limit);
-    const map = new Map<number, HistoryCandle>();
-    for (const c of remote) map.set(c.t, c);
-    for (const c of local) map.set(c.t, c);
-    return [...map.values()].sort((a, b) => a.t - b.t);
+    // CRITICAL: remote broker history must win. Local simulator bars used to
+    // overwrite Upstox OHLC and inflate aggregated highs/lows into giant candles.
+    return mergeRemotePreferring(remote, local);
   }
 
   private async loadLocal1m(
@@ -418,12 +461,20 @@ export class InstrumentService {
     to: number,
     limit: number,
   ): Promise<HistoryCandle[]> {
-    const keys = instrumentKey === historyKey ? [instrumentKey] : [instrumentKey, historyKey];
+    // Prefer the trader catalog key only — mixing DHAN + Upstox local rows at
+    // the same timestamps was a second source of polluted aggregates.
     const rows = await this.candleModel.find({
-      instrumentKey: { $in: keys },
+      instrumentKey,
       ts: { $gte: from, $lte: to },
     }).sort({ ts: 1 }).limit(limit).lean();
-    return rows.map((c) => ({ t: c.ts, o: c.o, h: c.h, l: c.l, c: c.c, v: c.v }));
+    if (rows.length || instrumentKey === historyKey) {
+      return rows.map((c) => ({ t: c.ts, o: c.o, h: c.h, l: c.l, c: c.c, v: c.v }));
+    }
+    const fallback = await this.candleModel.find({
+      instrumentKey: historyKey,
+      ts: { $gte: from, $lte: to },
+    }).sort({ ts: 1 }).limit(limit).lean();
+    return fallback.map((c) => ({ t: c.ts, o: c.o, h: c.h, l: c.l, c: c.c, v: c.v }));
   }
 
   /** Last known close for instruments with no live tick in Redis. */
@@ -441,17 +492,31 @@ export class InstrumentService {
         lastBar = { ts: mongoLast.ts, o: mongoLast.o, h: mongoLast.h, l: mongoLast.l, c: mongoLast.c, v: mongoLast.v };
       }
 
-      if (!lastBar && this.history.hasToken()) {
-        try {
-          const to = Date.now();
-          const from = to - 7 * 86400_000;
-          const bars = await this.history.fetchCandles(historyKey, 'day', from, to);
-          const bar = bars[bars.length - 1];
-          if (bar) {
-            lastBar = { ts: bar.t, o: bar.o, h: bar.h, l: bar.l, c: bar.c, v: bar.v };
+      if (!lastBar) {
+        const to = Date.now();
+        const from = to - 7 * 86400_000;
+        const dhanTarget = resolveDhanChartTarget(key, inst ?? { segment: 'EQ' });
+        if (this.dhanHistory.hasToken() && dhanTarget) {
+          try {
+            const bars = await this.dhanHistory.fetchCandles(dhanTarget, 'day', from, to);
+            const bar = bars[bars.length - 1];
+            if (bar) {
+              lastBar = { ts: bar.t, o: bar.o, h: bar.h, l: bar.l, c: bar.c, v: bar.v };
+            }
+          } catch {
+            // ignore — try Upstox next
           }
-        } catch {
-          // ignore — no history available
+        }
+        if (!lastBar && this.history.hasToken() && !historyKey.startsWith('DHAN|')) {
+          try {
+            const bars = await this.history.fetchCandles(historyKey, 'day', from, to);
+            const bar = bars[bars.length - 1];
+            if (bar) {
+              lastBar = { ts: bar.t, o: bar.o, h: bar.h, l: bar.l, c: bar.c, v: bar.v };
+            }
+          } catch {
+            // ignore — no history available
+          }
         }
       }
 
@@ -484,33 +549,6 @@ export class InstrumentService {
     }));
     return out;
   }
-}
-
-function aggregateFrom1m(bars: HistoryCandle[], interval: UpstoxCandleInterval): HistoryCandle[] {
-  if (interval === '1minute' || !bars.length) return bars;
-  const bucketMs = intervalBucketMs(interval);
-  const buckets = new Map<number, HistoryCandle>();
-  for (const b of bars) {
-    const bucket = interval === 'day'
-      ? istDayStartMs(b.t)
-      : b.t - (b.t % bucketMs);
-    const cur = buckets.get(bucket);
-    if (!cur) {
-      buckets.set(bucket, { t: bucket, o: b.o, h: b.h, l: b.l, c: b.c, v: b.v });
-    } else {
-      cur.h = Math.max(cur.h, b.h);
-      cur.l = Math.min(cur.l, b.l);
-      cur.c = b.c;
-      cur.v += b.v;
-    }
-  }
-  return [...buckets.values()].sort((a, b) => a.t - b.t);
-}
-
-function istDayStartMs(tsMs: number): number {
-  const istOffsetMs = 5.5 * 60 * 60 * 1000;
-  const ist = tsMs + istOffsetMs;
-  return Math.floor(ist / 86_400_000) * 86_400_000 - istOffsetMs;
 }
 
 function escapeRegex(s: string): string {

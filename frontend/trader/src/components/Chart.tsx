@@ -15,14 +15,22 @@ import type { Instrument } from '@/lib/types';
 import { getSession } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 import { useQuotes } from '@/lib/quote-store';
-import { getDataFeed, barBucketSec, SUPPORTED_RESOLUTIONS, type Bar, type Resolution, type SymbolInfo } from '@/lib/market/datafeed';
+import {
+  getDataFeed,
+  barBucketSec,
+  pricescaleFromTick,
+  SUPPORTED_RESOLUTIONS,
+  validateBars,
+  isValidBar,
+  type Bar,
+  type Resolution,
+  type SymbolInfo,
+} from '@/lib/market/datafeed';
 import {
   computeConfluence,
   extendTrendline,
   DEFAULT_CONFLUENCE_SETTINGS,
-  sanitizeBars,
   barPriceRange,
-  isValidBar,
   type ConfluenceSettings,
   type ConfluenceResult,
 } from '@/lib/market/indicators';
@@ -65,7 +73,8 @@ function quoteSeedBar(ltp: number, resolution: Resolution): Bar {
 }
 
 function priceFormatFromInfo(info: SymbolInfo) {
-  const tick = info.pricescale > 0 ? 1 / info.pricescale : 0.05;
+  const scale = info.pricescale > 0 ? info.pricescale : pricescaleFromTick(undefined, info.segment);
+  const tick = 1 / scale;
   const precision = tick >= 1 ? 0 : Math.max(0, Math.ceil(-Math.log10(tick) - 1e-9));
   return { type: 'price' as const, precision, minMove: tick };
 }
@@ -245,7 +254,11 @@ export function Chart({ inst }: { inst: Instrument }) {
           vertLines: { color: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' },
           horzLines: { color: dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' },
         },
-        rightPriceScale: { autoScale: true, borderVisible: false },
+        rightPriceScale: {
+          autoScale: true,
+          borderVisible: false,
+          scaleMargins: { top: 0.08, bottom: 0.12 },
+        },
         timeScale: { borderVisible: false, timeVisible: true, secondsVisible: false },
         crosshair: { mode: 1 },
       });
@@ -253,6 +266,8 @@ export function Chart({ inst }: { inst: Instrument }) {
         upColor: '#16a34a', downColor: '#dc2626',
         borderUpColor: '#16a34a', borderDownColor: '#dc2626',
         wickUpColor: '#16a34a', wickDownColor: '#dc2626',
+        priceLineVisible: true,
+        lastValueVisible: true,
       });
       const emaFast = chart.addLineSeries({ color: '#3b82f6', lineWidth: 1, ...OVERLAY_SERIES_OPTS });
       const emaSlow = chart.addLineSeries({ color: '#f97316', lineWidth: 1, ...OVERLAY_SERIES_OPTS });
@@ -324,7 +339,7 @@ export function Chart({ inst }: { inst: Instrument }) {
       session: '0915-1530',
       timezone: 'Asia/Kolkata',
       minmov: 1,
-      pricescale: 100,
+      pricescale: pricescaleFromTick(0.05, inst.segment),
       has_intraday: true,
       supported_resolutions: [...SUPPORTED_RESOLUTIONS],
       volume_precision: 0,
@@ -341,7 +356,7 @@ export function Chart({ inst }: { inst: Instrument }) {
     };
 
     const timer = window.setTimeout(() => {
-      finish('Market data timed out — check API / Upstox token');
+      finish('Market data timed out — check API / Dhan token');
     }, LOAD_TIMEOUT_MS);
 
     const loadBars = (info: SymbolInfo) => {
@@ -352,13 +367,15 @@ export function Chart({ inst }: { inst: Instrument }) {
       const applyLoaded = (bars: Bar[]) => {
         window.clearTimeout(timer);
         if (cancelled) return;
-        let displayBars = sanitizeBars(bars);
         const ltp = liveQuoteRef.current?.ltp;
+        let displayBars = validateBars(bars, { refPrice: ltp && ltp > 0 ? ltp : undefined });
         if (!displayBars.length && ltp && ltp > 0) {
-          displayBars = sanitizeBars([quoteSeedBar(ltp, resolution)]);
+          displayBars = validateBars([quoteSeedBar(ltp, resolution)], { refPrice: ltp });
         }
         barsRef.current = [...displayBars];
         series.setData(displayBars as CandlestickData[]);
+        // Force autoscale to the cleaned candle range (not polluted overlays).
+        chart.priceScale('right').applyOptions({ autoScale: true, scaleMargins: { top: 0.08, bottom: 0.12 } });
         applyConfluence(displayBars, settingsRef.current, 'full');
         setBarsLoading(false);
         setStatus(
@@ -410,20 +427,20 @@ export function Chart({ inst }: { inst: Instrument }) {
               { from: to - 86400 * 3, to, countBack: 2000 },
               (bars1m) => {
                 if (!cancelled) {
-                  mtfBarsRef.current = sanitizeBars(bars1m);
+                  mtfBarsRef.current = validateBars(bars1m);
                   applyConfluence(barsRef.current, settingsRef.current, 'price');
                 }
               },
               () => { mtfBarsRef.current = []; },
             );
           } else if (resolution === '1') {
-            mtfBarsRef.current = sanitizeBars(bars);
+            mtfBarsRef.current = validateBars(bars);
           }
         },
         (err) => {
           window.clearTimeout(timer);
           const soft = err.includes('503') || err.toLowerCase().includes('token')
-            ? 'Candles need Upstox access token (Admin → Upstox API)'
+            ? 'Candles need Dhan access token (Admin → Dhan API)'
             : err.includes('404') || err.toLowerCase().includes('not found')
               ? 'Instrument not found — sync master in Admin'
               : err.includes('500') || /failed|fetch|network|refused/i.test(err)

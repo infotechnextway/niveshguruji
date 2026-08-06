@@ -3,6 +3,11 @@ import {
 } from '../infrastructure/instrument-mapper';
 import { normalizeFeeds } from '../infrastructure/feed/upstox-protobuf';
 import { parseCandles } from '../infrastructure/upstox-history.client';
+import {
+  mapDhanInstrumentEnum,
+  parseDhanCandles,
+  resolveDhanChartTarget,
+} from '../infrastructure/dhan-history.client';
 
 describe('mapUpstoxInstrument', () => {
   it('maps NSE equity rows', () => {
@@ -78,6 +83,44 @@ describe('parseCandles (Upstox history)', () => {
     });
     expect(bars).toHaveLength(2);
     expect(bars[1]).toMatchObject({ t: 1_700_000_000_000, o: 105, h: 106, l: 104, c: 105.5, v: 200 });
+  });
+});
+
+describe('parseDhanCandles (Dhan history)', () => {
+  it('parses parallel OHLC arrays and converts epoch seconds', () => {
+    const bars = parseDhanCandles({
+      open: [100, 105],
+      high: [110, 106],
+      low: [95, 104],
+      close: [105, 105.5],
+      volume: [1000, 200],
+      timestamp: [1_700_000_000, 1_700_000_060],
+    });
+    expect(bars).toHaveLength(2);
+    expect(bars[0]).toMatchObject({ t: 1_700_000_000_000, o: 100, h: 110, l: 95, c: 105, v: 1000 });
+    expect(bars[1].t).toBe(1_700_000_060_000);
+  });
+
+  it('drops invalid OHLC rows', () => {
+    const bars = parseDhanCandles({
+      open: [100, -1],
+      high: [90, 10], // high < low
+      low: [95, 5],
+      close: [105, 8],
+      volume: [1, 1],
+      timestamp: [1_700_000_000, 1_700_000_060],
+    });
+    expect(bars).toHaveLength(0);
+  });
+
+  it('resolves DHAN| keys and instrument enums', () => {
+    expect(resolveDhanChartTarget('DHAN|NSE_EQ|2885', { segment: 'EQ' })).toEqual({
+      securityId: '2885',
+      exchangeSegment: 'NSE_EQ',
+      instrument: 'EQUITY',
+    });
+    expect(mapDhanInstrumentEnum({ segment: 'INDEX' })).toBe('INDEX');
+    expect(mapDhanInstrumentEnum({ segment: 'FO', symbol: 'NIFTY', optType: 'CE' })).toBe('OPTIDX');
   });
 });
 

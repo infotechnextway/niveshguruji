@@ -20,6 +20,7 @@ import { UpstoxAdminController } from './presentation/upstox-admin.controller';
 import { AngelAdminController, FeedModeAdminController } from './presentation/angel-admin.controller';
 import { DhanAdminController } from './presentation/dhan-admin.controller';
 import { UpstoxHistoryClient } from './infrastructure/upstox-history.client';
+import { DhanHistoryClient } from './infrastructure/dhan-history.client';
 import { AuthModule } from '../auth/auth.module';
 import { AdminModule } from '../admin/admin.module';
 
@@ -48,6 +49,7 @@ import { AdminModule } from '../admin/admin.module';
     InstrumentSyncService,
     WatchlistService,
     UpstoxHistoryClient,
+    DhanHistoryClient,
     UpstoxCredentialsService,
     AngelCredentialsService,
     AngelTokenSyncService,

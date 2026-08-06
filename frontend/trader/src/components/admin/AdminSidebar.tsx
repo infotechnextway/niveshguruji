@@ -56,7 +56,7 @@ export function AdminSidebar() {
       <div className="admin-sb__brand">
         <span className="admin-sb__mark" aria-hidden />
         <div className="admin-sb__brand-text">
-          <span className="admin-sb__brand-name">RIDGELINE</span>
+          <span className="admin-sb__brand-name">NIVESH<span className="brand-guru">GURU</span></span>
           <span className="admin-sb__brand-tag">Admin console</span>
         </div>
       </div>

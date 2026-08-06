@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import type { Quote } from './types';
 import { api } from './api';
-import { getDataFeed } from './market/datafeed';
+import { getDataFeed, setLiveBarsEnabled } from './market/datafeed';
 
 type QuoteStatus = 'idle' | 'connecting' | 'live' | 'snapshot' | 'error';
 
@@ -16,7 +16,8 @@ interface QuoteState {
 }
 
 let listenerAttached = false;
-let marketOpen = true;
+/** Assume closed until /market/status responds — avoids applying after-hours WS ticks. */
+let marketOpen = false;
 let snapshotTimer: ReturnType<typeof setInterval> | null = null;
 
 function mergeQuote(
@@ -38,8 +39,14 @@ function mergeQuote(
 function fetchMarketStatus(): void {
   void api<{ eqOpen: boolean }>('/market/status')
     .then((s) => {
+      const wasOpen = marketOpen;
       marketOpen = s.eqOpen;
       useQuotes.setState({ marketOpen: s.eqOpen });
+      // Keep chart/datafeed in sync so bars freeze when cash market closes.
+      setLiveBarsEnabled(s.eqOpen);
+      if (wasOpen !== s.eqOpen) {
+        ensureSnapshotPolling([...useQuotes.getState().subscribed]);
+      }
     })
     .catch(() => undefined);
 }
@@ -98,7 +105,7 @@ export const useQuotes = create<QuoteState>((set, get) => ({
   subscribed: new Set(),
   error: null,
   status: 'idle',
-  marketOpen: true,
+  marketOpen: false,
   subscribe: (keys) => {
     fetchMarketStatus();
     const next = new Set(get().subscribed);

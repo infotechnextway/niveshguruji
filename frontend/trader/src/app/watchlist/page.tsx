@@ -29,6 +29,7 @@ const FALLBACK: Instrument = {
 };
 
 const DEFAULT_TABS: WlTab[] = [
+  { tab: 'MY', name: 'My Watchlist', count: 0 },
   { tab: 'STOCKS', name: 'Stocks', count: 0 },
   { tab: 'INDICES', name: 'Indices', count: 0 },
   { tab: 'OPTIONS', name: 'Options', count: 0 },
@@ -41,6 +42,31 @@ const TAB_SEGMENT: Record<string, string | undefined> = {
   OPTIONS: 'FO',
   CURRENCY: 'CUR',
 };
+
+const MY_WATCHLIST_NAME = 'My Watchlist';
+
+function isCatalogTab(tab: string): boolean {
+  return Boolean(TAB_SEGMENT[tab]);
+}
+
+function isPersonalTab(tab: string): boolean {
+  return !isCatalogTab(tab);
+}
+
+/** Prefer "My Watchlist", else first custom list, ahead of catalog tabs. */
+function orderTabs(rows: WlTab[]): WlTab[] {
+  const catalog = DEFAULT_TABS.filter((t) => isCatalogTab(t.tab)).map((def) => {
+    const hit = rows.find((r) => r.tab === def.tab);
+    return hit ?? def;
+  });
+  const personal = rows.filter((r) => isPersonalTab(r.tab));
+  personal.sort((a, b) => {
+    if (a.name === MY_WATCHLIST_NAME) return -1;
+    if (b.name === MY_WATCHLIST_NAME) return 1;
+    return a.tab.localeCompare(b.tab);
+  });
+  return [...personal, ...catalog];
+}
 
 const BROWSE_PAGE = 100;
 
@@ -56,7 +82,7 @@ function writeLocal(map: Record<string, Instrument[]>) {
 function WatchlistInner() {
   const searchParams = useSearchParams();
   const [tabs, setTabs] = useState<WlTab[]>(DEFAULT_TABS);
-  const [activeTab, setActiveTab] = useState('STOCKS');
+  const [activeTab, setActiveTab] = useState('MY');
   const [items, setItems] = useState<WlItem[]>([]);
   const [selected, setSelected] = useState<Instrument>(FALLBACK);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -82,6 +108,8 @@ function WatchlistInner() {
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef(0);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const defaultedTab = useRef(false);
   const quotes = useQuotes((s) => s.quotes);
   const subscribe = useQuotes((s) => s.subscribe);
 
@@ -148,36 +176,76 @@ function WatchlistInner() {
     const list = map[tab] ?? [];
     setItems(list.map((inst, i) => ({ instrumentKey: inst.instrumentKey, sort: i, instrument: inst })));
     setStarred(new Set(list.map((i) => i.instrumentKey)));
-    if (list.length && !TAB_SEGMENT[tab]) {
+    if (list.length && isPersonalTab(tab)) {
       subscribe(list.map((i) => i.instrumentKey));
       setSelected((prev) => list.find((i) => i.instrumentKey === prev.instrumentKey) ?? list[0]);
     }
-    if (!TAB_SEGMENT[tab]) {
-      setTabs((prev) => prev.map((t) => ({ ...t, count: (map[t.tab] ?? []).length })));
+    if (isPersonalTab(tab)) {
+      setTabs((prev) => prev.map((t) => (
+        isPersonalTab(t.tab) ? { ...t, count: (map[t.tab] ?? []).length } : t
+      )));
     }
   }, [subscribe]);
 
+  const ensureMyWatchlistLocal = useCallback((): WlTab[] => {
+    const map = readLocal();
+    if (!map.MY) {
+      map.MY = [];
+      writeLocal(map);
+    }
+    const personal = Object.keys(map)
+      .filter((k) => isPersonalTab(k))
+      .map((tab) => ({
+        tab,
+        name: tab === 'MY' ? MY_WATCHLIST_NAME : tab,
+        count: (map[tab] ?? []).length,
+      }));
+    return orderTabs([...personal, ...DEFAULT_TABS.filter((t) => isCatalogTab(t.tab))]);
+  }, []);
+
   const loadTabs = useCallback(async () => {
     try {
-      const rows = await api<WlTab[]>('/watchlist');
-      setTabs(rows.length ? rows : DEFAULT_TABS);
+      let rows = await api<WlTab[]>('/watchlist');
+      const hasPersonal = rows.some((r) => isPersonalTab(r.tab));
+      if (!hasPersonal) {
+        try {
+          const created = await api<{ tab: string; name: string }>('/watchlist', {
+            method: 'POST',
+            body: JSON.stringify({ name: MY_WATCHLIST_NAME }),
+          });
+          rows = [...rows, { tab: created.tab, name: created.name, count: 0 }];
+        } catch { /* ignore — user may lack permission briefly */ }
+      }
+      const ordered = orderTabs(rows.length ? rows : DEFAULT_TABS);
+      setTabs(ordered);
       setApiOk(true);
       setHint('');
+      if (!defaultedTab.current) {
+        defaultedTab.current = true;
+        const firstPersonal = ordered.find((t) => isPersonalTab(t.tab));
+        if (firstPersonal) setActiveTab(firstPersonal.tab);
+      }
     } catch (err) {
       setApiOk(false);
       setHint(err instanceof ApiError ? err.message : 'Watchlist API unavailable — using local lists');
-      setTabs(DEFAULT_TABS);
-      if (!TAB_SEGMENT[activeTab]) loadFromLocal(activeTab);
+      const localTabs = ensureMyWatchlistLocal();
+      setTabs(localTabs);
+      if (!defaultedTab.current) {
+        defaultedTab.current = true;
+        setActiveTab('MY');
+      }
+      loadFromLocal('MY');
     }
-  }, [activeTab, loadFromLocal]);
+  }, [ensureMyWatchlistLocal, loadFromLocal]);
 
   const loadItems = useCallback(async (tab: string) => {
+    if (isCatalogTab(tab)) return;
     try {
       const rows = await api<WlItem[]>(`/watchlist/${tab}`);
       setItems(rows);
       setStarred(new Set(rows.map((r) => r.instrumentKey)));
       const instruments = rows.map((r) => r.instrument).filter(Boolean) as Instrument[];
-      if (instruments.length && !TAB_SEGMENT[tab]) {
+      if (instruments.length) {
         subscribe(instruments.map((i) => i.instrumentKey));
         setSelected((prev) => instruments.find((i) => i.instrumentKey === prev.instrumentKey) ?? instruments[0]);
       }
@@ -188,8 +256,26 @@ function WatchlistInner() {
     }
   }, [loadFromLocal, subscribe]);
 
+  /** Load star state for catalog tabs from the primary personal list. */
+  const refreshStarredFromSaveTab = useCallback(async (saveTab: string) => {
+    try {
+      const rows = await api<WlItem[]>(`/watchlist/${saveTab}`);
+      setStarred(new Set(rows.map((r) => r.instrumentKey)));
+    } catch {
+      const map = readLocal();
+      setStarred(new Set((map[saveTab] ?? []).map((i) => i.instrumentKey)));
+    }
+  }, []);
+
   useEffect(() => { void loadTabs(); }, [loadTabs]);
-  useEffect(() => { void loadItems(activeTab); }, [activeTab, loadItems]);
+  useEffect(() => {
+    if (isPersonalTab(activeTab)) {
+      void loadItems(activeTab);
+      return;
+    }
+    const saveTab = tabs.find((t) => isPersonalTab(t.tab))?.tab;
+    if (saveTab) void refreshStarredFromSaveTab(saveTab);
+  }, [activeTab, loadItems, refreshStarredFromSaveTab, tabs]);
 
   const loadBrowse = useCallback(async (seg: string, offset: number, append: boolean) => {
     setBrowseLoading(true);
@@ -263,43 +349,97 @@ function WatchlistInner() {
     setExpanded(null);
   }
 
-  function openChain(inst: Instrument) {
-    setSelected(inst);
-    setCenterView('chain');
-    setExpanded(null);
+  /** Open chart/chain detail — on mobile this swaps list → detail only after explicit Chart/Chain tap. */
+  function openChart(inst: Instrument) {
+    selectInstrument(inst, 'chart');
   }
 
-  async function addToWatchlist(inst: Instrument) {
+  function openChain(inst: Instrument) {
+    selectInstrument(inst, 'chain');
+  }
+
+  function toggleInstrumentRow(inst: Instrument) {
+    setSelected(inst);
+    setExpanded((prev) => (prev === inst.instrumentKey ? null : inst.instrumentKey));
+  }
+
+  const saveTabId = useMemo(() => {
+    if (isPersonalTab(activeTab)) return activeTab;
+    return tabs.find((t) => isPersonalTab(t.tab))?.tab ?? 'MY';
+  }, [activeTab, tabs]);
+
+  const saveTabName = useMemo(
+    () => tabs.find((t) => t.tab === saveTabId)?.name ?? MY_WATCHLIST_NAME,
+    [tabs, saveTabId],
+  );
+
+  function focusAddSearch() {
+    searchInputRef.current?.focus();
+    searchInputRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  async function toggleWatchlist(inst: Instrument) {
+    const tab = saveTabId;
+    const inList = starred.has(inst.instrumentKey);
+    const tabLabel = tabs.find((t) => t.tab === tab)?.name ?? MY_WATCHLIST_NAME;
+
     if (apiOk) {
       try {
-        await api(`/watchlist/${activeTab}`, {
-          method: 'POST',
-          body: JSON.stringify({ instrumentKey: inst.instrumentKey }),
-        });
-        setStarred((prev) => new Set(prev).add(inst.instrumentKey));
-        setPulseKey(inst.instrumentKey);
-        setTimeout(() => setPulseKey(null), 700);
-        setToast(`Added ${inst.symbol}`);
-        await loadItems(activeTab);
+        if (inList) {
+          await api(`/watchlist/${tab}/${encodeURIComponent(inst.instrumentKey)}`, { method: 'DELETE' });
+          setStarred((prev) => {
+            const next = new Set(prev);
+            next.delete(inst.instrumentKey);
+            return next;
+          });
+          setToast(`Removed ${inst.symbol} from ${tabLabel}`);
+        } else {
+          await api(`/watchlist/${tab}`, {
+            method: 'POST',
+            body: JSON.stringify({ instrumentKey: inst.instrumentKey }),
+          });
+          setStarred((prev) => new Set(prev).add(inst.instrumentKey));
+          setPulseKey(inst.instrumentKey);
+          setTimeout(() => setPulseKey(null), 700);
+          setToast(`Added ${inst.symbol} to ${tabLabel}`);
+        }
+        if (isPersonalTab(activeTab)) await loadItems(activeTab);
         await loadTabs();
         return;
       } catch { /* fall through to local */ }
     }
+
     const map = readLocal();
-    const list = map[activeTab] ?? [];
-    if (!list.some((i) => i.instrumentKey === inst.instrumentKey)) {
-      map[activeTab] = [...list, inst];
+    const list = map[tab] ?? [];
+    if (inList) {
+      map[tab] = list.filter((i) => i.instrumentKey !== inst.instrumentKey);
       writeLocal(map);
+      setStarred((prev) => {
+        const next = new Set(prev);
+        next.delete(inst.instrumentKey);
+        return next;
+      });
+      setToast(`Removed ${inst.symbol} from ${tabLabel}`);
+    } else {
+      if (!list.some((i) => i.instrumentKey === inst.instrumentKey)) {
+        map[tab] = [...list, inst];
+        writeLocal(map);
+      }
+      setStarred((prev) => new Set(prev).add(inst.instrumentKey));
+      setPulseKey(inst.instrumentKey);
+      setTimeout(() => setPulseKey(null), 700);
+      setToast(`Added ${inst.symbol} to ${tabLabel}`);
     }
-    setStarred((prev) => new Set(prev).add(inst.instrumentKey));
-    setPulseKey(inst.instrumentKey);
-    setTimeout(() => setPulseKey(null), 700);
-    setToast(`Added ${inst.symbol}`);
-    loadFromLocal(activeTab);
+    if (isPersonalTab(activeTab)) loadFromLocal(activeTab);
+    else {
+      setTabs((prev) => prev.map((t) => (
+        t.tab === tab ? { ...t, count: (map[tab] ?? []).length } : t
+      )));
+    }
   }
 
   async function createWatchlist() {
-    const name = window.prompt('Watchlist name', `Watchlist ${tabs.filter((t) => t.tab.startsWith('WL')).length + 1}`);
+    const name = window.prompt('Watchlist name', `Watchlist ${tabs.filter((t) => isPersonalTab(t.tab)).length + 1}`);
     if (!name?.trim()) return;
     setCreating(true);
     try {
@@ -313,7 +453,10 @@ function WatchlistInner() {
         setToast(`Created “${created.name}”`);
       } else {
         const id = `WL${Date.now().toString().slice(-4)}`;
-        setTabs((prev) => [...prev, { tab: id, name: name.trim(), count: 0 }]);
+        const map = readLocal();
+        map[id] = [];
+        writeLocal(map);
+        setTabs((prev) => orderTabs([...prev, { tab: id, name: name.trim(), count: 0 }]));
         setActiveTab(id);
         setToast(`Created “${name.trim()}” (local)`);
       }
@@ -353,7 +496,15 @@ function WatchlistInner() {
 
             <div className="wt-search">
               <Icon.Search size={14} />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search NIFTY, RELIANCE, TCS…" autoComplete="off" />
+              <input
+                ref={searchInputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={isPersonalTab(activeTab)
+                  ? `Search & add to ${saveTabName}…`
+                  : 'Search NIFTY, RELIANCE, TCS…'}
+                autoComplete="off"
+              />
               {query && (
                 <button type="button" className="wt-clear" onClick={() => setQuery('')}><Icon.X size={12} /></button>
               )}
@@ -362,25 +513,55 @@ function WatchlistInner() {
             <div className="wt-list" ref={listRef} onScroll={onListScroll}>
               {query.trim() ? (
                 <>
-                  <div className="wt-section">{searching ? 'Searching…' : `${results.length} results`}</div>
+                  <div className="wt-section">
+                    {searching ? 'Searching…' : `${results.length} results`}
+                    {isPersonalTab(activeTab) && !searching && (
+                      <span className="wt-section-hint"> · tap + to add</span>
+                    )}
+                  </div>
                   {results.map((inst) => {
                     const q = quotes[inst.instrumentKey];
                     const inList = starred.has(inst.instrumentKey);
+                    const isOpen = expanded === inst.instrumentKey;
+                    const isSel = selected.instrumentKey === inst.instrumentKey;
                     return (
-                      <div key={inst.instrumentKey} className={`wt-row ${pulseKey === inst.instrumentKey ? 'pulse' : ''}`}>
-                        <button type="button" className="wt-main" onClick={() => selectInstrument(inst)}>
-                          <div className="wt-sym">
-                            <strong>{inst.symbol}</strong>
-                            <span>{inst.exchange} · {inst.segment}</span>
+                      <div key={inst.instrumentKey} className={`wt-item ${isSel ? 'sel' : ''} ${isOpen ? 'open' : ''} ${pulseKey === inst.instrumentKey ? 'pulse' : ''}`}>
+                        <div className="wt-row-top">
+                          <button type="button" className="wt-main" onClick={() => toggleInstrumentRow(inst)}>
+                            <div className="wt-sym">
+                              <strong>{inst.symbol}</strong>
+                              <span>{inst.exchange} · {inst.segment}</span>
+                            </div>
+                            <div className="wt-px">
+                              <span className="ltp num">{q ? price(q.ltp) : '—'}</span>
+                              <span className={`chg num ${q ? signClass(q.changePct) : ''}`}>{q ? pct(q.changePct) : '—'}</span>
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            className={`wt-add ${inList ? 'on' : ''}`}
+                            aria-label={inList ? `Remove ${inst.symbol} from watchlist` : `Add ${inst.symbol} to watchlist`}
+                            title={inList ? `Remove from ${saveTabName}` : `Add to ${saveTabName}`}
+                            onClick={() => void toggleWatchlist(inst)}
+                          >
+                            {inList ? <Icon.Check size={14} /> : <span className="wt-add-plus">+</span>}
+                          </button>
+                        </div>
+                        {isOpen && (
+                          <div className="wt-actions">
+                            <button
+                              type="button"
+                              className={`add ${inList ? 'on' : ''}`}
+                              onClick={() => void toggleWatchlist(inst)}
+                            >
+                              {inList ? 'Added' : 'Add'}
+                            </button>
+                            <button type="button" className="buy" onClick={() => openOrder(inst, 'BUY')}>Buy</button>
+                            <button type="button" className="sell" onClick={() => openOrder(inst, 'SELL')}>Sell</button>
+                            <button type="button" onClick={() => openChart(inst)}>Chart</button>
+                            <button type="button" onClick={() => openChain(inst)}>Chain</button>
                           </div>
-                          <div className="wt-px">
-                            <span className="ltp num">{q ? price(q.ltp) : '—'}</span>
-                            <span className={`chg num ${q ? signClass(q.changePct) : ''}`}>{q ? pct(q.changePct) : '—'}</span>
-                          </div>
-                        </button>
-                        <button type="button" className={`wt-star ${inList ? 'on' : ''}`} aria-label="Add to watchlist" onClick={() => void addToWatchlist(inst)}>
-                          <Icon.Star size={15} filled={inList} />
-                        </button>
+                        )}
                       </div>
                     );
                   })}
@@ -388,65 +569,81 @@ function WatchlistInner() {
                 </>
               ) : (
                 <>
-                  <div className="wt-section">
-                    {TAB_SEGMENT[activeTab]
-                      ? `${listRows.length}${browseEnd ? '' : '+'} ${tabs.find((t) => t.tab === activeTab)?.name ?? 'instruments'}`
-                      : `${displayItems.length} saved`}
-                    {browseLoading && ' · loading…'}
+                  <div className="wt-section wt-section-row">
+                    <span>
+                      {isCatalogTab(activeTab)
+                        ? `${listRows.length}${browseEnd ? '' : '+'} ${tabs.find((t) => t.tab === activeTab)?.name ?? 'instruments'}`
+                        : `${displayItems.length} saved`}
+                      {browseLoading && ' · loading…'}
+                    </span>
+                    {isPersonalTab(activeTab) && (
+                      <button type="button" className="wt-add-cta" onClick={focusAddSearch}>
+                        + Add
+                      </button>
+                    )}
                   </div>
-                  {!TAB_SEGMENT[activeTab] && displayItems.length === 0 && (
-                    <div className="wt-empty">Star symbols from Stocks/Indices tabs, or create a custom list.</div>
+                  {isPersonalTab(activeTab) && displayItems.length === 0 && (
+                    <div className="wt-empty wt-empty-cta">
+                      <p>No symbols in {saveTabName} yet.</p>
+                      <button type="button" className="wt-add-cta primary" onClick={focusAddSearch}>
+                        Search &amp; add instruments
+                      </button>
+                      <p className="wt-empty-sub">Or open Stocks / Indices and tap + to save symbols here.</p>
+                    </div>
                   )}
-                  {(TAB_SEGMENT[activeTab] ? listRows : displayItems.map((r) => r.instrument!)).map((inst) => {
+                  {(isCatalogTab(activeTab) ? listRows : displayItems.map((r) => r.instrument!)).map((inst) => {
                     const q = quotes[inst.instrumentKey];
                     const isOpen = expanded === inst.instrumentKey;
                     const isSel = selected.instrumentKey === inst.instrumentKey;
                     const inList = starred.has(inst.instrumentKey);
                     return (
-                      <div key={inst.instrumentKey} className={`wt-item ${isSel ? 'sel' : ''} ${isOpen ? 'open' : ''}`}>
-                        <button
-                          type="button"
-                          className="wt-main"
-                          onClick={() => {
-                            if (isMobile) {
-                              selectInstrument(inst);
-                            } else {
-                              setSelected(inst);
-                              setExpanded(isOpen ? null : inst.instrumentKey);
-                            }
-                          }}
-                        >
-                          <div className="wt-sym">
-                            <strong>{inst.symbol}</strong>
-                            <span>{inst.exchange} · {inst.segment}</span>
-                          </div>
-                          <div className="wt-px">
-                            <span className="ltp num">{q ? price(q.ltp) : '—'}</span>
-                            <span className={`chg num ${q ? signClass(q.changePct) : ''}`}>{q ? pct(q.changePct) : '—'}</span>
-                          </div>
-                        </button>
-                        {TAB_SEGMENT[activeTab] && (
+                      <div key={inst.instrumentKey} className={`wt-item ${isSel ? 'sel' : ''} ${isOpen ? 'open' : ''} ${pulseKey === inst.instrumentKey ? 'pulse' : ''}`}>
+                        <div className="wt-row-top">
                           <button
                             type="button"
-                            className={`wt-star ${inList ? 'on' : ''}`}
-                            aria-label="Add to watchlist"
-                            onClick={() => void addToWatchlist(inst)}
+                            className="wt-main"
+                            onClick={() => toggleInstrumentRow(inst)}
                           >
-                            <Icon.Star size={15} filled={inList} />
+                            <div className="wt-sym">
+                              <strong>{inst.symbol}</strong>
+                              <span>{inst.exchange} · {inst.segment}</span>
+                            </div>
+                            <div className="wt-px">
+                              <span className="ltp num">{q ? price(q.ltp) : '—'}</span>
+                              <span className={`chg num ${q ? signClass(q.changePct) : ''}`}>{q ? pct(q.changePct) : '—'}</span>
+                            </div>
                           </button>
-                        )}
-                        {isOpen && !isMobile && (
+                          <button
+                            type="button"
+                            className={`wt-add ${inList ? 'on' : ''}`}
+                            aria-label={inList ? `Remove ${inst.symbol} from watchlist` : `Add ${inst.symbol} to watchlist`}
+                            title={inList ? `Remove from ${saveTabName}` : `Add to ${saveTabName}`}
+                            onClick={() => void toggleWatchlist(inst)}
+                          >
+                            {isPersonalTab(activeTab)
+                              ? <Icon.X size={14} />
+                              : (inList ? <Icon.Star size={15} filled /> : <span className="wt-add-plus">+</span>)}
+                          </button>
+                        </div>
+                        {isOpen && (
                           <div className="wt-actions">
+                            <button
+                              type="button"
+                              className={`add ${inList ? 'on' : ''}`}
+                              onClick={() => void toggleWatchlist(inst)}
+                            >
+                              {inList ? (isPersonalTab(activeTab) ? 'Remove' : 'Added') : 'Add'}
+                            </button>
                             <button type="button" className="buy" onClick={() => openOrder(inst, 'BUY')}>Buy</button>
                             <button type="button" className="sell" onClick={() => openOrder(inst, 'SELL')}>Sell</button>
-                            <button type="button" onClick={() => { setSelected(inst); setCenterView('chart'); setExpanded(null); }}>Chart</button>
-                            <button type="button" onClick={() => openChain(inst)}>Option Chain</button>
+                            <button type="button" onClick={() => openChart(inst)}>Chart</button>
+                            <button type="button" onClick={() => openChain(inst)}>Chain</button>
                           </div>
                         )}
                       </div>
                     );
                   })}
-                  {TAB_SEGMENT[activeTab] && !browseLoading && listRows.length === 0 && (
+                  {isCatalogTab(activeTab) && !browseLoading && listRows.length === 0 && (
                     <div className="wt-empty">No instruments in this segment — run <code>npm run sync:instruments</code> in backend/ (or bootstrap:dev for a starter set).</div>
                   )}
                 </>
@@ -557,44 +754,80 @@ function WatchlistInner() {
           padding: 8px 14px 4px; font-size: 10px; text-transform: uppercase;
           letter-spacing: 0.06em; color: var(--text-faint);
         }
+        .wt-section-row {
+          display: flex; align-items: center; justify-content: space-between; gap: 8px;
+          padding-right: 10px;
+        }
+        .wt-section-hint { text-transform: none; letter-spacing: 0; opacity: 0.8; }
         .wt-empty { padding: 24px 16px; font-size: 12px; color: var(--text-dim); line-height: 1.45; }
+        .wt-empty-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+        .wt-empty-sub { margin: 0; font-size: 11px; color: var(--text-faint); }
+        .wt-add-cta {
+          appearance: none; border: 1px solid var(--line); background: var(--panel-2); color: var(--text);
+          border-radius: 6px; padding: 5px 10px; font-size: 11px; font-weight: 600;
+          cursor: pointer; font-family: inherit; text-transform: none; letter-spacing: 0;
+        }
+        .wt-add-cta.primary {
+          border-color: var(--accent); background: var(--accent-soft); color: var(--text);
+          padding: 8px 12px; font-size: 12px;
+        }
         .wt-row, .wt-item { border-bottom: 1px solid var(--line-soft); }
-        .wt-item { display: flex; flex-wrap: wrap; align-items: stretch; }
-        .wt-item .wt-main { flex: 1; min-width: 0; }
-        .wt-item .wt-star { width: 40px; flex-shrink: 0; }
+        .wt-item { display: flex; flex-direction: column; align-items: stretch; min-width: 0; }
+        .wt-row-top {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 44px;
+          align-items: stretch;
+          width: 100%;
+          min-width: 0;
+        }
+        .wt-item .wt-main { min-width: 0; width: 100%; }
+        .wt-item .wt-add { width: 44px; }
         .wt-item .wt-actions { width: 100%; }
         .wt-row { display: flex; align-items: stretch; }
-        .wt-row.pulse { animation: starPulse 0.6s ease; }
+        .wt-item.pulse { animation: starPulse 0.6s ease; }
         @keyframes starPulse {
           0% { background: var(--accent-soft); }
           100% { background: transparent; }
         }
         .wt-main {
-          flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px;
-          padding: 10px 12px; text-align: left; background: none; border: none; color: inherit;
+          display: flex; align-items: center; justify-content: space-between; gap: 10px;
+          padding: 10px 8px 10px 12px; text-align: left; background: none; border: none; color: inherit;
           cursor: pointer; font-family: inherit; min-width: 0;
         }
         .wt-item.sel .wt-main { background: var(--accent-soft); }
         .wt-main:hover { background: var(--panel-hover); }
-        .wt-sym { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .wt-sym { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
         .wt-sym strong { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
         .wt-sym span { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.04em; }
-        .wt-px { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+        .wt-px { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
         .ltp { font-size: 13px; font-weight: 500; color: var(--text); }
         .chg { font-size: 11px; }
-        .wt-star { width: 40px; border: none; background: transparent; color: var(--text-faint); cursor: pointer; display: grid; place-items: center; }
-        .wt-star.on, .wt-star:hover { color: #d4a017; }
+        .wt-add {
+          width: 44px; border: none; background: transparent; color: var(--text-faint);
+          cursor: pointer; display: grid; place-items: center; flex-shrink: 0;
+        }
+        .wt-add.on { color: #d4a017; }
+        .wt-add:hover { color: var(--text); background: var(--panel-hover); }
+        .wt-add-plus { font-size: 20px; font-weight: 600; line-height: 1; color: var(--accent); }
         .wt-actions {
-          display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0 12px 10px;
+          display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; padding: 0 12px 10px;
           animation: slideDown 0.15s ease;
         }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
         .wt-actions button {
           padding: 7px 4px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2);
           color: var(--text); font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit;
+          min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .wt-actions .buy { color: var(--gain); border-color: color-mix(in srgb, var(--gain) 35%, var(--line)); }
         .wt-actions .sell { color: var(--loss); border-color: color-mix(in srgb, var(--loss) 35%, var(--line)); }
+        .wt-actions .add { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+        .wt-actions .add.on { background: var(--accent-soft); }
+        @media (max-width: 700px) {
+          .wt-actions {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+        }
         .wt-center { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
         .wt-qbar {
           display: flex; align-items: center; gap: 12px; flex-wrap: wrap;

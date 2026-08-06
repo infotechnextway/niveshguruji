@@ -6,3 +6,9 @@ coverage/
 -e data-test/
 data-e2e/
 data/
+
+# Local packaging / debug dumps
+pts-trader-cpanel/
+login-body.json
+seg-*.out
+watchlist.out

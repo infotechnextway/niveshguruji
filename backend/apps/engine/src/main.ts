@@ -12,7 +12,8 @@ async function bootstrap(): Promise<void> {
 
   const config = app.get(ConfigService);
   const port = config.getOrThrow<number>('ENGINE_PORT');
-  await app.listen(port, '0.0.0.0'); // exposes /health only (no global prefix routes yet)
+  // Default loopback for local dev; set HOST=0.0.0.0 in Docker/VPS.
+  await app.listen(port, process.env.HOST || '127.0.0.1');
 }
 
 void bootstrap();
