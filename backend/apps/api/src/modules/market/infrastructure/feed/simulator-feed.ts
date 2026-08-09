@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Quote, referenceClose } from '@app/shared';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Quote, referenceCloseFor } from '@app/shared';
+import { Candle1m } from '../schemas/candle.schema';
+import { Instrument } from '../schemas/instrument.schema';
 import { MarketFeed, TickHandler } from './market-feed.port';
 
 interface SimState {
@@ -13,6 +17,10 @@ interface SimState {
  * per subscribed instrument at a fixed interval. Used for dev, for running
  * outside market hours, and — with a seeded RNG and pushTick() — for the P5
  * VEE's replay tests. No network, no credentials.
+ *
+ * Base prices prefer reference closes (by key / symbol), then last Mongo bar,
+ * then a segment-aware synthetic fallback — never a blind random EQ scale for
+ * known index names after Dhan key remapping.
  */
 @Injectable()
 export class SimulatorFeed implements MarketFeed {
@@ -23,6 +31,11 @@ export class SimulatorFeed implements MarketFeed {
   private timer?: ReturnType<typeof setInterval>;
   private lastTickAt: number | null = null;
   private seed = 0x2545f491;
+
+  constructor(
+    @InjectModel(Instrument.name) private readonly instruments: Model<Instrument>,
+    @InjectModel(Candle1m.name) private readonly candles: Model<Candle1m>,
+  ) {}
 
   async start(): Promise<void> {
     this.timer = setInterval(() => this.tickAll(), 1000);
@@ -37,7 +50,7 @@ export class SimulatorFeed implements MarketFeed {
   async subscribe(instrumentKeys: string[]): Promise<void> {
     for (const key of instrumentKeys) {
       if (!this.state.has(key)) {
-        const base = referenceClose(key) ?? this.syntheticBase(key);
+        const base = await this.resolveBase(key);
         this.state.set(key, { ltp: base, prevClose: base, volume: 0 });
       }
     }
@@ -98,10 +111,34 @@ export class SimulatorFeed implements MarketFeed {
     return h;
   }
 
+  private async resolveBase(key: string): Promise<number> {
+    const inst = await this.instruments.findOne({ instrumentKey: key })
+      .select('symbol name segment')
+      .lean();
+    const ref = referenceCloseFor({
+      instrumentKey: key,
+      symbol: inst?.symbol,
+      name: inst?.name,
+    });
+    if (ref != null) return ref;
+
+    const last = await this.candles.findOne({ instrumentKey: key })
+      .sort({ ts: -1 })
+      .select('c')
+      .lean();
+    if (last?.c && Number.isFinite(last.c) && last.c > 0) return last.c;
+
+    return this.syntheticBase(key, inst?.segment);
+  }
+
   /** Fallback base for instruments without a reference close — EQ-scale, not ~100–3000. */
-  private syntheticBase(key: string): number {
-    if (key.includes('_INDEX|') || key.includes('|IDX')) return 20_000 + (this.hash(key) % 35_000);
-    if (key.includes('_FO|') || key.includes('_FNO|')) return 50 + (this.hash(key) % 500);
+  private syntheticBase(key: string, segment?: string): number {
+    if (segment === 'INDEX' || key.includes('_INDEX|') || key.includes('|IDX')) {
+      return 20_000 + (this.hash(key) % 35_000);
+    }
+    if (segment === 'FO' || key.includes('_FO|') || key.includes('_FNO|')) {
+      return 50 + (this.hash(key) % 500);
+    }
     return 500 + (this.hash(key) % 4_500);
   }
 }

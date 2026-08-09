@@ -27,6 +27,7 @@ export class SwitchableMarketFeed implements MarketFeed {
   private readonly handlers: TickHandler[] = [];
   private started = false;
   private unsubMode?: () => void;
+  private readonly unsubCreds: Array<() => void> = [];
   private failoverTimer?: ReturnType<typeof setInterval>;
   private failedOver = false;
   /** Canonical keys subscribed upstream — reapplied after feed switches. */
@@ -58,6 +59,12 @@ export class SwitchableMarketFeed implements MarketFeed {
     this.failedOver = false;
     this.active = this.pickPrimary();
     this.unsubMode = this.feedMode.onChange(() => { void this.rebind(); });
+    // Credentials may land after boot — rebind so we leave simulator for live Dhan/etc.
+    this.unsubCreds.push(
+      this.dhanCreds.onChange(() => { void this.rebind(); }),
+      this.angelCreds.onChange(() => { void this.rebind(); }),
+      this.upstoxCreds.onChange(() => { void this.rebind(); }),
+    );
     await this.active.start();
     this.failoverTimer = setInterval(() => void this.checkFailover(), 5_000);
     this.failoverTimer.unref();
@@ -67,6 +74,7 @@ export class SwitchableMarketFeed implements MarketFeed {
     this.started = false;
     if (this.failoverTimer) clearInterval(this.failoverTimer);
     this.unsubMode?.();
+    for (const unsub of this.unsubCreds.splice(0)) unsub();
     await Promise.all([
       this.simulator.stop(),
       this.upstox.stop(),

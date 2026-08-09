@@ -19,9 +19,20 @@ const SUBSCRIBE_BATCH = 100;
 
 type TokenRoute = { exchangeSegment: string; securityId: string; instrumentKey: string };
 
+/** Parse `DHAN|<segment>|<securityId>` catalog keys into feed routes. */
+export function parseDhanInstrumentKey(instrumentKey: string): { exchangeSegment: string; securityId: string } | null {
+  if (!instrumentKey.startsWith('DHAN|')) return null;
+  const parts = instrumentKey.split('|');
+  if (parts.length < 3) return null;
+  const exchangeSegment = parts[1]?.trim();
+  const securityId = parts.slice(2).join('|').trim();
+  if (!exchangeSegment || !securityId) return null;
+  return { exchangeSegment, securityId };
+}
+
 /**
  * Dhan HQ v2 WebSocket market feed. Maps canonical instrument keys via DB
- * dhanSecurityId/dhanExchangeSegment and reconnects when credentials change.
+ * dhanSecurityId/dhanExchangeSegment (or DHAN|… keys) and reconnects when credentials change.
  */
 @Injectable()
 export class DhanFeed implements MarketFeed {
@@ -50,7 +61,13 @@ export class DhanFeed implements MarketFeed {
     this.stopped = false;
     this.unsubCreds = this.credentials.onChange(() => {
       this.logger.log('Dhan credentials changed — reconnecting feed');
-      this.ws?.close();
+      if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
+        this.ws.close();
+        return;
+      }
+      if (!this.stopped && this.credentials.isConfigured()) {
+        void this.connect();
+      }
     });
     if (!this.credentials.isConfigured()) {
       this.logger.warn('Dhan feed started without credentials — waiting for admin setup');
@@ -135,24 +152,7 @@ export class DhanFeed implements MarketFeed {
     for (const k of instrumentKeys) this.subscribedKeys.add(k);
     if (!fresh.length) return;
 
-    const rows = await this.instruments.find({
-      instrumentKey: { $in: fresh },
-      dhanSecurityId: { $exists: true, $ne: null },
-      dhanExchangeSegment: { $exists: true },
-    }).select('instrumentKey dhanSecurityId dhanExchangeSegment').lean();
-
-    const routes: TokenRoute[] = [];
-    for (const row of rows) {
-      if (!row.dhanSecurityId || !row.dhanExchangeSegment) continue;
-      const route: TokenRoute = {
-        exchangeSegment: row.dhanExchangeSegment,
-        securityId: row.dhanSecurityId,
-        instrumentKey: row.instrumentKey,
-      };
-      routes.push(route);
-      this.tokenRoutes.set(`${route.exchangeSegment}:${route.securityId}`, route);
-    }
-
+    const routes = await this.resolveRoutes(fresh);
     if (this.ws?.readyState === WebSocket.OPEN && routes.length) {
       await this.sendSubscribe(routes);
     }
@@ -164,17 +164,17 @@ export class DhanFeed implements MarketFeed {
 
     const rows = await this.instruments.find({
       instrumentKey: { $in: dropping },
-      dhanSecurityId: { $exists: true },
-      dhanExchangeSegment: { $exists: true },
     }).select('instrumentKey dhanSecurityId dhanExchangeSegment').lean();
 
+    const byKey = new Map(rows.map((r) => [r.instrumentKey, r]));
     const routes: Pick<TokenRoute, 'exchangeSegment' | 'securityId'>[] = [];
-    for (const row of rows) {
-      if (!row.dhanSecurityId || !row.dhanExchangeSegment) continue;
-      const key = `${row.dhanExchangeSegment}:${row.dhanSecurityId}`;
-      this.tokenRoutes.delete(key);
-      this.prevCloseByRoute.delete(key);
-      routes.push({ exchangeSegment: row.dhanExchangeSegment, securityId: row.dhanSecurityId });
+    for (const key of dropping) {
+      const resolved = this.resolveOne(key, byKey.get(key));
+      if (!resolved) continue;
+      const routeKey = `${resolved.exchangeSegment}:${resolved.securityId}`;
+      this.tokenRoutes.delete(routeKey);
+      this.prevCloseByRoute.delete(routeKey);
+      routes.push(resolved);
     }
 
     if (routes.length && this.ws?.readyState === WebSocket.OPEN) {
@@ -182,11 +182,62 @@ export class DhanFeed implements MarketFeed {
     }
   }
 
+  /**
+   * Rebuild routes and re-send subscribe after reconnect.
+   * Must clear subscribedKeys first — otherwise subscribe() treats every key as
+   * already subscribed and returns without rebuilding tokenRoutes.
+   */
   private async resubscribeAll(): Promise<void> {
     const keys = [...this.subscribedKeys];
+    this.subscribedKeys.clear();
     this.tokenRoutes.clear();
     this.prevCloseByRoute.clear();
     await this.subscribe(keys);
+  }
+
+  private async resolveRoutes(keys: string[]): Promise<TokenRoute[]> {
+    const rows = await this.instruments.find({
+      instrumentKey: { $in: keys },
+    }).select('instrumentKey dhanSecurityId dhanExchangeSegment').lean();
+    const byKey = new Map(rows.map((r) => [r.instrumentKey, r]));
+
+    const routes: TokenRoute[] = [];
+    const missing: string[] = [];
+    for (const key of keys) {
+      const resolved = this.resolveOne(key, byKey.get(key));
+      if (!resolved) {
+        missing.push(key);
+        continue;
+      }
+      const route: TokenRoute = { ...resolved, instrumentKey: key };
+      routes.push(route);
+      this.tokenRoutes.set(`${route.exchangeSegment}:${route.securityId}`, route);
+    }
+
+    if (missing.length) {
+      this.logger.warn(
+        `Dhan subscribe skipped ${missing.length} key(s) without security mapping `
+        + `(e.g. ${missing.slice(0, 3).join(', ')})`,
+      );
+    }
+    return routes;
+  }
+
+  private resolveOne(
+    instrumentKey: string,
+    row?: { dhanSecurityId?: string | null; dhanExchangeSegment?: string | null },
+  ): { exchangeSegment: string; securityId: string } | null {
+    let securityId = row?.dhanSecurityId?.trim() || undefined;
+    let exchangeSegment = row?.dhanExchangeSegment?.trim() || undefined;
+    if (!securityId || !exchangeSegment) {
+      const parsed = parseDhanInstrumentKey(instrumentKey);
+      if (parsed) {
+        exchangeSegment = exchangeSegment || parsed.exchangeSegment;
+        securityId = securityId || parsed.securityId;
+      }
+    }
+    if (!securityId || !exchangeSegment) return null;
+    return { exchangeSegment, securityId };
   }
 
   private async sendSubscribe(routes: TokenRoute[]): Promise<void> {

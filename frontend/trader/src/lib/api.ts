@@ -1,7 +1,8 @@
 'use client';
-import { getSession, getEmployeeSession, clearSession, clearEmployeeSession, isDemoMode } from './auth';
+import { getSession, getEmployeeSession, clearSession, clearEmployeeSession, isDemoMode, isDemoSession } from './auth';
+import { apiBase } from './api-base';
 
-const BASE = '/api/v1';
+const BASE = apiBase();
 
 function mergeHeaders(sessionToken: string | null, extra?: HeadersInit): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -58,7 +59,7 @@ function redirectAdminLogin(): void {
 function redirectTraderLogin(): void {
   if (typeof window === 'undefined') return;
   const path = window.location.pathname;
-  if (path.startsWith('/admin') || path === '/login') return;
+  if (path.startsWith('/admin') || path === '/login' || path === '/register') return;
   const next = encodeURIComponent(path + window.location.search);
   window.location.href = `/login?next=${next}`;
 }
@@ -69,8 +70,8 @@ export class ApiError extends Error {
   }
 }
 
-const DEFAULT_TIMEOUT_MS = 10_000;
-const SYNC_TIMEOUT_MS = 120_000;
+const DEFAULT_TIMEOUT_MS = 15_000;
+const SYNC_TIMEOUT_MS = 180_000;
 
 function resolveTimeoutMs(path: string, override?: number): number {
   if (override != null) return override;
@@ -80,7 +81,7 @@ function resolveTimeoutMs(path: string, override?: number): number {
 
 function syncTimeoutMessage(path: string): string {
   if (path.includes('/sync-tokens') || path.includes('/admin/instruments/sync')) {
-    return 'Instrument sync timed out — downloading the master file can take up to 2 minutes; try again on a stable connection';
+    return 'Instrument sync timed out — downloading the master file can take up to 3 minutes; try again on a stable connection';
   }
   return 'Request timed out';
 }
@@ -110,7 +111,7 @@ export async function api<T>(
       const code = body?.error?.code ?? 'HTTP_ERROR';
       const fallback =
         res.status === 500 && !body?.error?.message
-          ? 'Backend API unreachable — start it on port 4000 (cd backend && npm run start:api:dev)'
+          ? 'API proxy failed (often a timeout on instrument sync). Ensure backend is on :4000, or retry Sync.'
           : `Request failed (${res.status})`;
       const rawMessage = body?.error?.message ?? fallback;
       const message = friendlyAuthMessage(rawMessage, res.status, hadSession, adminRoute);
@@ -118,7 +119,7 @@ export async function api<T>(
         if (adminRoute) {
           clearEmployeeSession();
           redirectAdminLogin();
-        } else {
+        } else if (!isDemoSession()) {
           clearSession();
           redirectTraderLogin();
         }
@@ -131,7 +132,13 @@ export async function api<T>(
     if (err instanceof DOMException && err.name === 'AbortError') {
       throw new ApiError('TIMEOUT', syncTimeoutMessage(path), 408);
     }
-    throw new ApiError('NETWORK', err instanceof Error ? err.message : 'Network error', 0);
+    throw new ApiError(
+      'NETWORK',
+      err instanceof Error
+        ? `Cannot reach API (${err.message}). Is it running on ${BASE}?`
+        : 'Network error',
+      0,
+    );
   } finally {
     clearTimeout(timer);
   }

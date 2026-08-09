@@ -6,10 +6,10 @@ import { price, pct, signClass } from '@/lib/format';
 interface Holding { instrumentKey: string; symbol: string; qty: number; avgPrice: number; prevClose: number }
 
 const DEMO: Holding[] = [
-  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', qty: 50, avgPrice: 2820.30, prevClose: 2870 },
-  { instrumentKey: 'NSE_EQ|INE467B01029', symbol: 'TCS', qty: 20, avgPrice: 3785.00, prevClose: 3810 },
-  { instrumentKey: 'NSE_EQ|INE040A01034', symbol: 'HDFCBANK', qty: 100, avgPrice: 1602.75, prevClose: 1612 },
-  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', qty: 75, avgPrice: 1480.10, prevClose: 1492 },
+  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', qty: 50, avgPrice: 1310.30, prevClose: 1330 },
+  { instrumentKey: 'NSE_EQ|INE467B01029', symbol: 'TCS', qty: 20, avgPrice: 2410.00, prevClose: 2430 },
+  { instrumentKey: 'NSE_EQ|INE040A01034', symbol: 'HDFCBANK', qty: 100, avgPrice: 728.75, prevClose: 734 },
+  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', qty: 75, avgPrice: 1165.10, prevClose: 1174 },
 ];
 
 /** Delivery holdings table + value/P&L cards (logic unchanged from /holdings). */

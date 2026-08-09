@@ -51,6 +51,10 @@ export class UserListQueryDto {
   @IsOptional() @IsString() @Length(1, 100)
   search?: string;
 
+  @IsOptional()
+  @IsIn(['PENDING_MOBILE', 'PENDING_EMAIL', 'PENDING_APPROVAL', 'ACTIVE', 'SUSPENDED', 'REJECTED'])
+  status?: 'PENDING_MOBILE' | 'PENDING_EMAIL' | 'PENDING_APPROVAL' | 'ACTIVE' | 'SUSPENDED' | 'REJECTED';
+
   @IsOptional() @Type(() => Number) @IsInt() @Min(1)
   page?: number;
 
@@ -59,6 +63,11 @@ export class UserListQueryDto {
 }
 
 export class SuspendUserDto {
+  @IsString() @Length(5, 500)
+  reason!: string;
+}
+
+export class RejectUserDto {
   @IsString() @Length(5, 500)
   reason!: string;
 }

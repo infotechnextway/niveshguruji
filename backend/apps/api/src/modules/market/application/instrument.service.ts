@@ -3,7 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, PipelineStage } from 'mongoose';
 import Redis from 'ioredis';
 import { Inject } from '@nestjs/common';
-import { DomainError, Quote, quoteCacheKey, REDIS_CLIENT, referenceClose, referenceQuote, Result } from '@app/shared';
+import {
+  DomainError, Quote, quoteCacheKey, REDIS_CLIENT, referenceCloseFor, referenceQuote, Result,
+} from '@app/shared';
 import { Instrument } from '../infrastructure/schemas/instrument.schema';
 import {
   aggregatesFrom1m,
@@ -150,12 +152,17 @@ export class InstrumentService {
   async quotes(instrumentKeys: string[]): Promise<Record<string, Quote | null>> {
     if (!instrumentKeys.length) return {};
     const values = await this.redis.mget(instrumentKeys.map(quoteCacheKey));
+    const metaRows = await this.instruments.find({ instrumentKey: { $in: instrumentKeys } })
+      .select('instrumentKey symbol name')
+      .lean();
+    const metaByKey = new Map(metaRows.map((r) => [r.instrumentKey, r]));
     const out: Record<string, Quote | null> = {};
     const missing: string[] = [];
     instrumentKeys.forEach((key, i) => {
       if (values[i]) {
         const parsed = JSON.parse(values[i] as string) as Quote;
-        if (isStaleSimulatorQuote(key, parsed)) {
+        const meta = metaByKey.get(key);
+        if (isStaleSimulatorQuote(key, parsed, meta?.symbol, meta?.name)) {
           out[key] = null;
           missing.push(key);
         } else {
@@ -291,8 +298,17 @@ export class InstrumentService {
   ): Promise<HistoryCandle[]> {
     const keys = instrumentKey === historyKey ? [instrumentKey] : [instrumentKey, historyKey];
     let price: number | null = null;
+    const rows = await this.instruments.find({ instrumentKey: { $in: keys } })
+      .select('instrumentKey symbol name')
+      .lean();
+    const byKey = new Map(rows.map((r) => [r.instrumentKey, r]));
     for (const key of keys) {
-      price = referenceClose(key);
+      const row = byKey.get(key);
+      price = referenceCloseFor({
+        instrumentKey: key,
+        symbol: row?.symbol,
+        name: row?.name,
+      });
       if (price != null) break;
     }
     if (price == null) {
@@ -521,13 +537,30 @@ export class InstrumentService {
       }
 
       if (!lastBar) {
-        const ref = referenceClose(key);
+        const ref = referenceCloseFor({
+          instrumentKey: key,
+          symbol: inst?.symbol,
+          name: inst?.name,
+        });
         if (ref != null) {
           const q = referenceQuote(key, ref);
           if (q) out[key] = q;
         }
         return;
       }
+
+      const ref = referenceCloseFor({
+        instrumentKey: key,
+        symbol: inst?.symbol,
+        name: inst?.name,
+      });
+      // Discard polluted simulator / wrong-scale candles when we know a sane reference.
+      if (ref != null && (lastBar.c < ref * 0.4 || lastBar.c > ref * 1.6)) {
+        const q = referenceQuote(key, ref);
+        if (q) out[key] = q;
+        return;
+      }
+
       const prev = await this.candleModel.findOne({
         instrumentKey: { $in: lookupKeys },
         ts: { $lt: lastBar.ts },
@@ -555,9 +588,14 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** Reject legacy simulator ticks that cached ~100–3000 for major indices. */
-function isStaleSimulatorQuote(key: string, q: Quote): boolean {
-  const ref = referenceClose(key);
+/** Reject legacy simulator ticks that cached ~100–3000 for major indices / wrong DHAN seeds. */
+function isStaleSimulatorQuote(
+  key: string,
+  q: Quote,
+  symbol?: string,
+  name?: string,
+): boolean {
+  const ref = referenceCloseFor({ instrumentKey: key, symbol, name });
   if (ref == null) return false;
   return q.ltp < ref * 0.4 || q.ltp > ref * 1.6;
 }

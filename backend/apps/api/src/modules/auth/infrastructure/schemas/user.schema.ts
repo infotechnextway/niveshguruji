@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { KycStatus, UserStatus } from '../../domain/auth.types';
+import { IncomeType, KycStatus, UserStatus } from '../../domain/auth.types';
 
 @Schema({ collection: 'users', timestamps: true })
 export class User {
@@ -30,7 +30,17 @@ export class User {
   @Prop({ required: true, select: false })
   passwordHash!: string;
 
-  @Prop({ required: true, enum: Object.values(UserStatus), default: UserStatus.PENDING_MOBILE, index: true })
+  @Prop({ trim: true, maxlength: 500 })
+  address?: string;
+
+  @Prop({ enum: Object.values(IncomeType) })
+  incomeType?: IncomeType;
+
+  /** Monthly income / salary in INR (whole rupees). */
+  @Prop({ min: 0 })
+  monthlyIncome?: number;
+
+  @Prop({ required: true, enum: Object.values(UserStatus), default: UserStatus.PENDING_APPROVAL, index: true })
   status!: UserStatus;
 
   @Prop({ required: true, enum: Object.values(KycStatus), default: KycStatus.NOT_SUBMITTED })
@@ -44,6 +54,16 @@ export class User {
 
   @Prop()
   profilePictureKey?: string;
+
+  /** Set when an admin approves the registration. */
+  @Prop()
+  approvedAt?: Date;
+
+  @Prop()
+  approvedBy?: string;
+
+  @Prop()
+  rejectionReason?: string;
 }
 
 export type UserDocument = HydratedDocument<User>;

@@ -9,9 +9,10 @@ import { CurrentPrincipal, requestContext } from '../../auth/presentation/curren
 import { AccessTokenClaims } from '../../auth/domain/auth.types';
 import { PermissionsGuard, RequirePermissions } from './permissions.guard';
 import {
-  AuditQueryDto, CreateEmployeeDto, ResetEmployeePasswordDto, SetConfigDto, SuspendUserDto,
+  AuditQueryDto, CreateEmployeeDto, RejectUserDto, ResetEmployeePasswordDto, SetConfigDto, SuspendUserDto,
   UpdateEmployeeDto, UpdateRoleDto, UserListQueryDto,
 } from './dto/admin.dtos';
+import { UserStatus } from '../../auth/domain/auth.types';
 
 function unwrap<T>(result: Result<T, DomainError>): T {
   if (result.isFail) {
@@ -100,13 +101,35 @@ export class AdminController {
   @Get('users')
   @RequirePermissions('users.view')
   listUsers(@Query() query: UserListQueryDto) {
-    return this.usersAdmin.list(query.search, query.page ?? 1, query.pageSize ?? 20);
+    return this.usersAdmin.list(
+      query.search,
+      query.page ?? 1,
+      query.pageSize ?? 20,
+      query.status as UserStatus | undefined,
+    );
   }
 
   @Get('users/:id')
   @RequirePermissions('users.view')
   async userDetail(@Param('id') id: string) {
     return unwrap(await this.usersAdmin.detail(id));
+  }
+
+  @Post('users/:id/approve')
+  @RequirePermissions('users.approve')
+  async approveUser(@Param('id') id: string, @CurrentPrincipal() p: AccessTokenClaims, @Req() req: Request) {
+    return unwrap(await this.usersAdmin.approve(id, p.sub, requestContext(req).ip));
+  }
+
+  @Post('users/:id/reject')
+  @RequirePermissions('users.approve')
+  async rejectUser(
+    @Param('id') id: string,
+    @Body() dto: RejectUserDto,
+    @CurrentPrincipal() p: AccessTokenClaims,
+    @Req() req: Request,
+  ) {
+    return unwrap(await this.usersAdmin.reject(id, dto.reason, p.sub, requestContext(req).ip));
   }
 
   @Post('users/:id/suspend')

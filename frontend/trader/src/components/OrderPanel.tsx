@@ -4,6 +4,7 @@ import type { Instrument } from '@/lib/types';
 import { useQuotes } from '@/lib/quote-store';
 import { price } from '@/lib/format';
 import { RiskMeter } from './RiskMeter';
+import { api, ApiError } from '@/lib/api';
 
 type Side = 'BUY' | 'SELL';
 type OrderType = 'MARKET' | 'LIMIT';
@@ -39,8 +40,54 @@ export function OrderPanel({ inst, challengeId, onPlaced, preferredSide }: {
   async function submit() {
     setSubmitting(true);
     try {
-      await new Promise(r => setTimeout(r, 400));
-      onPlaced?.(`${side} ${qty} ${inst.symbol} @ ${type === 'MARKET' ? 'market' : price(estPrice)} placed`, true);
+      if (!challengeId) {
+        onPlaced?.('No active challenge — activate a plan before trading.', false);
+        return;
+      }
+      let limitPricePaise: number | undefined;
+      if (type === 'LIMIT') {
+        const px = Number(limitPrice);
+        if (!Number.isFinite(px) || px <= 0) {
+          onPlaced?.('Enter a valid limit price.', false);
+          return;
+        }
+        limitPricePaise = Math.round(px * 100);
+      }
+      let trigger: { kind: 'STOP_LOSS' | 'TARGET'; pricePaise: number } | undefined;
+      if (attach !== 'NONE') {
+        const tpx = Number(attachPrice);
+        if (!Number.isFinite(tpx) || tpx <= 0) {
+          onPlaced?.(`Enter a valid ${attach === 'SL' ? 'stop-loss' : 'target'} price.`, false);
+          return;
+        }
+        trigger = {
+          kind: attach === 'SL' ? 'STOP_LOSS' : 'TARGET',
+          pricePaise: Math.round(tpx * 100),
+        };
+      }
+      const result = await api<{ orderId: string; status: string; filledPricePaise?: number }>('/orders', {
+        method: 'POST',
+        body: JSON.stringify({
+          challengeId,
+          instrumentKey: inst.instrumentKey,
+          side,
+          type,
+          product,
+          qty,
+          ...(limitPricePaise != null ? { limitPricePaise } : {}),
+          ...(trigger ? { trigger } : {}),
+        }),
+      });
+      const pxLabel =
+        result.filledPricePaise != null
+          ? price(result.filledPricePaise / 100)
+          : type === 'MARKET'
+            ? 'market'
+            : price(estPrice);
+      onPlaced?.(`${side} ${qty} ${inst.symbol} @ ${pxLabel} · ${result.status}`, true);
+    } catch (e: unknown) {
+      const msg = e instanceof ApiError ? e.message : e instanceof Error ? e.message : 'Order failed';
+      onPlaced?.(msg, false);
     } finally { setSubmitting(false); }
   }
 

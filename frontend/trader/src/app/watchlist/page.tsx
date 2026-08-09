@@ -219,7 +219,14 @@ function WatchlistInner() {
       const ordered = orderTabs(rows.length ? rows : DEFAULT_TABS);
       setTabs(ordered);
       setApiOk(true);
-      setHint('');
+      const stocksCount = ordered.find((t) => t.tab === 'STOCKS')?.count ?? 0;
+      if (stocksCount > 0 && stocksCount < 50) {
+        setHint(
+          `Only ${stocksCount} stocks in catalog (starter seed). On the server run: cd backend && MONGO_URI=… npm run sync:instruments — or Admin → Instruments → Sync.`,
+        );
+      } else {
+        setHint('');
+      }
       if (!defaultedTab.current) {
         defaultedTab.current = true;
         const firstPersonal = ordered.find((t) => isPersonalTab(t.tab));
@@ -859,9 +866,9 @@ function WatchlistInner() {
           font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit;
         }
         .wt-view-toggle button.on { background: var(--panel); color: var(--text); box-shadow: var(--shadow-sm); }
-        .wt-q-btns { display: flex; gap: 8px; }
+        .wt-q-btns { display: flex; gap: 8px; flex-shrink: 0; margin-left: auto; }
         .wt-q-btns button {
-          min-width: 72px; padding: 8px 14px; border-radius: 8px; border: none;
+          min-width: 80px; padding: 10px 16px; border-radius: 8px; border: none;
           font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; color: #fff;
         }
         .wt-q-btns .buy { background: var(--gain); }

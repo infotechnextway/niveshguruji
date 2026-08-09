@@ -1,12 +1,22 @@
 'use client';
 import { useEffect, useId, useState } from 'react';
-import type { Instrument, Side } from '@/lib/types';
+import type { ChallengeProgress, Instrument, Side } from '@/lib/types';
 import { useQuotes } from '@/lib/quote-store';
 import { price } from '@/lib/format';
 import { Icon } from '@/components/Icons';
+import { api, ApiError } from '@/lib/api';
+import { getSession } from '@/lib/auth';
 
-type Product = 'MIS' | 'CNC' | 'NRML';
-type OrderType = 'MARKET' | 'LIMIT' | 'SL' | 'SL-M';
+type UiProduct = 'MIS' | 'CNC' | 'NRML';
+type UiOrderType = 'MARKET' | 'LIMIT' | 'SL' | 'SL-M';
+
+function toApiProduct(p: UiProduct): 'INTRADAY' | 'CARRY_FORWARD' {
+  return p === 'MIS' ? 'INTRADAY' : 'CARRY_FORWARD';
+}
+
+function rupeesToPaise(rupees: number): number {
+  return Math.round(rupees * 100);
+}
 
 export function OrderModal({
   open,
@@ -24,13 +34,16 @@ export function OrderModal({
   const titleId = useId();
   const [side, setSide] = useState<Side>(initialSide);
   const [qty, setQty] = useState(1);
-  const [product, setProduct] = useState<Product>('MIS');
-  const [orderType, setOrderType] = useState<OrderType>('MARKET');
+  const [product, setProduct] = useState<UiProduct>('MIS');
+  const [orderType, setOrderType] = useState<UiOrderType>('MARKET');
   const [limitPrice, setLimitPrice] = useState('');
   const [triggerPrice, setTriggerPrice] = useState('');
   const [target, setTarget] = useState('');
   const [stopLoss, setStopLoss] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState('');
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const [challengeStatus, setChallengeStatus] = useState<string | null>(null);
   const q = useQuotes((s) => s.quotes[instrument?.instrumentKey ?? '']);
 
   useEffect(() => {
@@ -42,7 +55,24 @@ export function OrderModal({
     setTriggerPrice('');
     setTarget('');
     setStopLoss('');
+    setErr('');
   }, [open, instrument?.instrumentKey, initialSide]);
+
+  useEffect(() => {
+    if (!open) return;
+    setChallengeId(null);
+    setChallengeStatus(null);
+    if (!getSession()) return;
+    void api<{ challenge: ChallengeProgress | null }>('/challenge/current')
+      .then((res) => {
+        setChallengeId(res.challenge?.id ?? null);
+        setChallengeStatus(res.challenge?.status ?? null);
+      })
+      .catch(() => {
+        setChallengeId(null);
+        setChallengeStatus(null);
+      });
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -63,13 +93,79 @@ export function OrderModal({
 
   async function submit() {
     setSubmitting(true);
+    setErr('');
     try {
-      await new Promise((r) => setTimeout(r, 350));
-      const px = orderType === 'MARKET' || orderType === 'SL-M'
-        ? 'market'
-        : price(Number(limitPrice) || q?.ltp || 0);
-      onPlaced(`${side} ${qty} ${instrument!.symbol} @ ${px}`);
+      if (!getSession()) {
+        throw new Error('Sign in with a trader account to place orders. Demo mode cannot trade.');
+      }
+      if (!challengeId) {
+        throw new Error('No active challenge — activate a plan before trading.');
+      }
+      if (challengeStatus && !['PENDING', 'ACTIVE'].includes(challengeStatus)) {
+        throw new Error(`Challenge is ${challengeStatus} — trading is not allowed.`);
+      }
+
+      const apiType: 'MARKET' | 'LIMIT' =
+        orderType === 'LIMIT' || orderType === 'SL' ? 'LIMIT' : 'MARKET';
+
+      let limitPricePaise: number | undefined;
+      if (apiType === 'LIMIT') {
+        const px = Number(limitPrice);
+        if (!Number.isFinite(px) || px <= 0) {
+          throw new Error('Enter a valid limit price.');
+        }
+        limitPricePaise = rupeesToPaise(px);
+      }
+
+      let trigger: { kind: 'STOP_LOSS' | 'TARGET'; pricePaise: number } | undefined;
+      if (needsTrigger) {
+        const tpx = Number(triggerPrice);
+        if (!Number.isFinite(tpx) || tpx <= 0) {
+          throw new Error('Enter a valid trigger price.');
+        }
+        trigger = { kind: 'STOP_LOSS', pricePaise: rupeesToPaise(tpx) };
+      } else if (stopLoss.trim()) {
+        const tpx = Number(stopLoss);
+        if (!Number.isFinite(tpx) || tpx <= 0) {
+          throw new Error('Enter a valid stop-loss price.');
+        }
+        trigger = { kind: 'STOP_LOSS', pricePaise: rupeesToPaise(tpx) };
+      } else if (target.trim()) {
+        const tpx = Number(target);
+        if (!Number.isFinite(tpx) || tpx <= 0) {
+          throw new Error('Enter a valid target price.');
+        }
+        trigger = { kind: 'TARGET', pricePaise: rupeesToPaise(tpx) };
+      }
+
+      const result = await api<{ orderId: string; status: string; filledPricePaise?: number }>('/orders', {
+        method: 'POST',
+        body: JSON.stringify({
+          challengeId,
+          instrumentKey: instrument!.instrumentKey,
+          side,
+          type: apiType,
+          product: toApiProduct(product),
+          qty,
+          ...(limitPricePaise != null ? { limitPricePaise } : {}),
+          ...(trigger ? { trigger } : {}),
+        }),
+      });
+
+      const pxLabel =
+        result.filledPricePaise != null
+          ? price(result.filledPricePaise / 100)
+          : apiType === 'MARKET'
+            ? 'market'
+            : price(Number(limitPrice) || q?.ltp || 0);
+      onPlaced(`${side} ${qty} ${instrument!.symbol} @ ${pxLabel} · ${result.status}`);
       onClose();
+    } catch (e: unknown) {
+      if (e instanceof ApiError) {
+        setErr(e.message);
+      } else {
+        setErr(e instanceof Error ? e.message : 'Order failed');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -145,6 +241,8 @@ export function OrderModal({
             <input type="number" step="0.05" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} placeholder="—" />
           </label>
         </div>
+
+        {err && <div className="om-err" role="alert">{err}</div>}
 
         <div className="om-actions">
           <button type="button" className="om-cancel" onClick={onClose}>Cancel</button>
@@ -238,6 +336,10 @@ export function OrderModal({
           min-width: 0;
         }
         .om-row .om-field { margin-bottom: 12px; }
+        .om-err {
+          margin-bottom: 12px; padding: 8px 12px; border-radius: 8px;
+          background: var(--loss-soft); color: var(--loss); font-size: 12px; line-height: 1.4;
+        }
         .om-actions { display: flex; gap: 10px; margin-top: 4px; min-width: 0; }
         .om-cancel {
           flex: 1; min-width: 0; padding: 12px; border-radius: 8px; border: 1px solid var(--line);

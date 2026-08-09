@@ -7,9 +7,7 @@ const describeE2E = E2E_ENABLED ? describe : describe.skip;
 
 /**
  * Full onboarding + auth flow against a live database. Verifies the envelope
- * contract, verification gating, and refresh-token rotation end to end.
- * OTP/verification tokens are read straight from the DB (no SMS/mail needed;
- * console adapters are active in this env).
+ * contract, admin-approval gating, and refresh-token rotation end to end.
  */
 describeE2E('Onboarding & auth (e2e)', () => {
   let app: INestApplication;
@@ -34,60 +32,54 @@ describeE2E('Onboarding & auth (e2e)', () => {
 
   const api = () => request(app.getHttpServer());
 
-  it('registers, returns the envelope, and creates a PENDING_MOBILE user', async () => {
+  it('registers, returns the envelope, and creates a PENDING_APPROVAL user', async () => {
     const res = await api().post('/api/v1/auth/register').send({
-      name: 'E2E User', email, mobile, username, password,
+      name: 'E2E User',
+      email,
+      mobile,
+      username,
+      password,
+      address: '12 MG Road, Bengaluru, Karnataka 560001',
+      incomeType: 'SALARIED',
+      monthlyIncome: 85000,
     });
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
     expect(res.body.data.userId).toBeDefined();
 
     const user = await db.collection('users').findOne({ email });
-    expect(user?.status).toBe('PENDING_MOBILE');
+    expect(user?.status).toBe('PENDING_APPROVAL');
+    expect(user?.address).toContain('Bengaluru');
+    expect(user?.incomeType).toBe('SALARIED');
+    expect(user?.monthlyIncome).toBe(85000);
   });
 
   it('rejects duplicate registration with 409', async () => {
     const res = await api().post('/api/v1/auth/register').send({
-      name: 'Dup', email, mobile, username, password,
+      name: 'Dup',
+      email,
+      mobile,
+      username,
+      password,
+      address: 'Somewhere',
+      incomeType: 'OWN',
+      monthlyIncome: 10000,
     });
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe('DUPLICATE');
   });
 
-  it('blocks login until verification is complete', async () => {
+  it('blocks login until admin approval', async () => {
     const res = await api().post('/api/v1/auth/login').send({ identifier: username, password });
     expect(res.status).toBe(403);
-    expect(res.body.error.code).toBe('VERIFICATION_PENDING');
+    expect(res.body.error.code).toBe('APPROVAL_PENDING');
   });
 
-  it('verifies mobile then email, activates the account, and logs in', async () => {
-    // The console SMS adapter doesn't return the code; read the hash target is
-    // opaque, so we re-issue via a known code path: fetch latest OTP doc and
-    // brute the 6-digit space is not acceptable — instead we set a known code.
-    const otpDoc = await db.collection('otp_requests').findOne({ target: mobile }, { sort: { createdAt: -1 } });
-    expect(otpDoc).toBeTruthy();
-    // Inject a deterministic code by rewriting the stored hash for this test.
-    const { createHash } = await import('crypto');
-    const code = '424242';
-    const codeHash = createHash('sha256').update(`${code}:${process.env.OTP_PEPPER}`).digest('hex');
-    await db.collection('otp_requests').updateOne({ _id: otpDoc!._id }, { $set: { codeHash } });
-
-    const verifyMobile = await api().post('/api/v1/auth/otp/verify').send({ mobile, code });
-    expect(verifyMobile.status).toBe(201);
-    expect(verifyMobile.body.data.status).toBe('PENDING_EMAIL');
-
-    // Email verification uses a signed token; mint one the same way the service does.
-    const user = await db.collection('users').findOne({ email });
-    const { JwtService } = await import('@nestjs/jwt');
-    const jwt = new JwtService({});
-    const priv = Buffer.from(process.env.JWT_PRIVATE_KEY_B64!, 'base64').toString('utf8');
-    const token = jwt.sign(
-      { sub: String(user!._id), typ: 'email-verify', email },
-      { algorithm: 'RS256', privateKey: priv, expiresIn: 3600 },
+  it('allows login after admin approval', async () => {
+    await db.collection('users').updateOne(
+      { email },
+      { $set: { status: 'ACTIVE', approvedAt: new Date(), approvedBy: 'e2e' } },
     );
-    const verifyEmail = await api().get(`/api/v1/auth/email/verify?token=${token}`);
-    expect(verifyEmail.status).toBe(200);
-    expect(verifyEmail.body.data.status).toBe('ACTIVE');
 
     const login = await api().post('/api/v1/auth/login').send({ identifier: email, password });
     expect(login.status).toBe(201);

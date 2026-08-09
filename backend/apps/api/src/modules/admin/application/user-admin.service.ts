@@ -7,6 +7,9 @@ import { Session } from '../../auth/infrastructure/schemas/session.schema';
 import { LoginHistory } from '../../auth/infrastructure/schemas/login-history.schema';
 import { UserStatus } from '../../auth/domain/auth.types';
 
+const LIST_SELECT =
+  'name email mobile username address incomeType monthlyIncome status kycStatus createdAt approvedAt rejectionReason';
+
 @Injectable()
 export class UserAdminService {
   constructor(
@@ -16,20 +19,20 @@ export class UserAdminService {
     private readonly audit: AuditService,
   ) {}
 
-  async list(search: string | undefined, page: number, pageSize: number) {
-    const filter = search
-      ? {
-          $or: [
-            { email: { $regex: escapeRegex(search), $options: 'i' } },
-            { usernameLower: { $regex: escapeRegex(search.toLowerCase()) } },
-            { mobile: { $regex: escapeRegex(search) } },
-            { name: { $regex: escapeRegex(search), $options: 'i' } },
-          ],
-        }
-      : {};
+  async list(search: string | undefined, page: number, pageSize: number, status?: UserStatus) {
+    const filter: Record<string, unknown> = {};
+    if (status) filter.status = status;
+    if (search) {
+      filter.$or = [
+        { email: { $regex: escapeRegex(search), $options: 'i' } },
+        { usernameLower: { $regex: escapeRegex(search.toLowerCase()) } },
+        { mobile: { $regex: escapeRegex(search) } },
+        { name: { $regex: escapeRegex(search), $options: 'i' } },
+      ];
+    }
     const [items, total] = await Promise.all([
       this.users.find(filter).sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
-        .select('name email mobile username status kycStatus createdAt').lean(),
+        .select(LIST_SELECT).lean(),
       this.users.countDocuments(filter),
     ]);
     return { items, total, page, pageSize };
@@ -47,6 +50,64 @@ export class UserAdminService {
     return Result.ok({ user, activeSessions, recentLogins });
   }
 
+  async approve(id: string, actorId: string, ip?: string): Promise<Result<true>> {
+    const before = await this.users.findById(id).lean();
+    if (!before) return Result.fail(DomainError.of('NOT_FOUND', 'User not found'));
+    if (before.status !== UserStatus.PENDING_APPROVAL) {
+      return Result.fail(DomainError.of('NOT_PENDING', 'User is not awaiting approval'));
+    }
+    await this.users.updateOne(
+      { _id: id },
+      {
+        $set: {
+          status: UserStatus.ACTIVE,
+          approvedAt: new Date(),
+          approvedBy: actorId,
+        },
+        $unset: { rejectionReason: 1 },
+      },
+    );
+    await this.audit.record({
+      actorType: 'EMPLOYEE',
+      actorId,
+      action: 'USER_APPROVED',
+      entity: 'user',
+      entityId: id,
+      before: { status: before.status },
+      after: { status: UserStatus.ACTIVE },
+      ip,
+    });
+    return Result.ok(true);
+  }
+
+  async reject(id: string, reason: string, actorId: string, ip?: string): Promise<Result<true>> {
+    const before = await this.users.findById(id).lean();
+    if (!before) return Result.fail(DomainError.of('NOT_FOUND', 'User not found'));
+    if (before.status !== UserStatus.PENDING_APPROVAL) {
+      return Result.fail(DomainError.of('NOT_PENDING', 'User is not awaiting approval'));
+    }
+    await this.users.updateOne(
+      { _id: id },
+      {
+        $set: {
+          status: UserStatus.REJECTED,
+          rejectionReason: reason,
+        },
+      },
+    );
+    await this.audit.record({
+      actorType: 'EMPLOYEE',
+      actorId,
+      action: 'USER_REJECTED',
+      entity: 'user',
+      entityId: id,
+      before: { status: before.status },
+      after: { status: UserStatus.REJECTED, reason },
+      ip,
+    });
+    return Result.ok(true);
+  }
+
   async suspend(id: string, reason: string, actorId: string, ip?: string): Promise<Result<true>> {
     return this.setStatus(id, UserStatus.SUSPENDED, 'USER_SUSPENDED', reason, actorId, ip);
   }
@@ -57,12 +118,14 @@ export class UserAdminService {
     if (user.status !== UserStatus.SUSPENDED) {
       return Result.fail(DomainError.of('NOT_SUSPENDED', 'User is not suspended'));
     }
-    // Restore to the correct pre-suspension point in the verification flow.
-    const restored = !user.mobileVerified
-      ? UserStatus.PENDING_MOBILE
-      : !user.emailVerified
-        ? UserStatus.PENDING_EMAIL
-        : UserStatus.ACTIVE;
+    // Restore to the correct pre-suspension point.
+    const restored = user.approvedAt
+      ? UserStatus.ACTIVE
+      : !user.mobileVerified
+        ? UserStatus.PENDING_MOBILE
+        : !user.emailVerified
+          ? UserStatus.PENDING_EMAIL
+          : UserStatus.PENDING_APPROVAL;
     return this.setStatus(id, restored, 'USER_UNSUSPENDED', reason, actorId, ip);
   }
 

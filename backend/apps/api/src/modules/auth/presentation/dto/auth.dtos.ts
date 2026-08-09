@@ -1,4 +1,7 @@
-import { IsEmail, IsIn, IsOptional, IsString, Length, Matches, MaxLength, MinLength, ValidateIf } from 'class-validator';
+import {
+  IsEmail, IsIn, IsInt, IsNumber, IsOptional, IsString, Length, Matches, Max, MaxLength, Min, MinLength, ValidateIf,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,72}$/;
 const PASSWORD_MSG = 'Password must be 8–72 chars with upper, lower and a digit';
@@ -18,6 +21,20 @@ export class RegisterDto {
 
   @Matches(PASSWORD_RULE, { message: PASSWORD_MSG })
   password!: string;
+
+  @IsString() @Length(5, 500)
+  address!: string;
+
+  @IsIn(['SALARIED', 'OWN'])
+  incomeType!: 'SALARIED' | 'OWN';
+
+  /** Monthly salary / income in INR (whole rupees). */
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 0 })
+  @IsInt()
+  @Min(0)
+  @Max(100_000_000)
+  monthlyIncome!: number;
 
   @IsOptional() @IsString() @MaxLength(20)
   referredBy?: string;

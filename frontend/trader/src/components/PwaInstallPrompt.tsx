@@ -104,7 +104,7 @@ export function PwaInstallPrompt() {
             <Icon.DashboardFilled size={22} />
           </div>
           <div className="pwa-toast__text">
-            <strong>Install RIDGELINE CAPITAL</strong>
+            <strong>Install NiveshGuru</strong>
             <span>
               Tap <em>Share</em> <span className="pwa-toast__share-icon" aria-hidden>⎙</span> then{' '}
               <em>Add to Home Screen</em> for quick access.
@@ -128,7 +128,7 @@ export function PwaInstallPrompt() {
         </div>
         <div className="pwa-toast__text">
           <strong>Install app</strong>
-          <span>Add RIDGELINE CAPITAL to your home screen for a native-like experience.</span>
+          <span>Add NiveshGuru to your home screen for a native-like experience.</span>
         </div>
       </div>
       <div className="pwa-toast__actions">

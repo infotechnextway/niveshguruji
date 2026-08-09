@@ -1,8 +1,16 @@
 export enum UserStatus {
   PENDING_MOBILE = 'PENDING_MOBILE',
   PENDING_EMAIL = 'PENDING_EMAIL',
+  /** Registered; waiting for admin to approve login access. */
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
   ACTIVE = 'ACTIVE',
   SUSPENDED = 'SUSPENDED',
+  REJECTED = 'REJECTED',
+}
+
+export enum IncomeType {
+  SALARIED = 'SALARIED',
+  OWN = 'OWN',
 }
 
 export enum KycStatus {

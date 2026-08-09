@@ -5,8 +5,8 @@ import { price, signClass } from '@/lib/format';
 import { TradeToast } from '@/components/trading/TradeToast';
 
 const DEMO = [
-  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', product: 'MIS', netQty: 20, avgPrice: 2884.50 },
-  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', product: 'MIS', netQty: -15, avgPrice: 1495.20 },
+  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', product: 'MIS', netQty: 20, avgPrice: 1325.50 },
+  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', product: 'MIS', netQty: -15, avgPrice: 1168.20 },
 ];
 
 /** Open positions table + MTM summary (logic unchanged from /positions). */
