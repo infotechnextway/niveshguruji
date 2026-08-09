@@ -67,6 +67,9 @@ function PortfolioInner() {
         .head { margin-bottom: 16px; }
         h1 { margin: 0; font-size: 22px; font-weight: 600; }
         p { margin: 6px 0 0; color: var(--text-dim); font-size: 13px; }
+        @media (max-width: 700px) {
+          .pf { padding: 16px 14px 32px; }
+        }
       `}</style>
     </AppShell>
   );

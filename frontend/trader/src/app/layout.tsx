@@ -4,13 +4,13 @@ import { ThemeProvider, themeInitScript } from '@/lib/theme';
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 
 export const metadata: Metadata = {
-  title: 'RIDGELINE CAPITAL — Paper Trading',
+  title: 'NiveshGuru — Paper Trading',
   description: 'Practice trading Indian markets and prove your edge through structured evaluations.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'RIDGELINE',
+    title: 'NiveshGuru',
   },
   icons: {
     icon: [
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#2D5FE8' },
-    { media: '(prefers-color-scheme: dark)', color: '#5680FF' },
+    { media: '(prefers-color-scheme: light)', color: '#2BA89A' },
+    { media: '(prefers-color-scheme: dark)', color: '#2BA89A' },
   ],
 };
 
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="RIDGELINE" />
+        <meta name="apple-mobile-web-app-title" content="NiveshGuru" />
         <meta name="mobile-web-app-capable" content="yes" />
         {/* Applied before React hydrates — prevents a white flash for dark-mode users */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />

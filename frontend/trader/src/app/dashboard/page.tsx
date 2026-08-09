@@ -24,8 +24,8 @@ const DEMO_CHALLENGE: ChallengeProgress = {
 };
 
 const DEMO_POSITIONS = [
-  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', product: 'INTRADAY', netQty: 20, avgPrice: 2884.50 },
-  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', product: 'INTRADAY', netQty: -15, avgPrice: 1495.20 },
+  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', product: 'INTRADAY', netQty: 20, avgPrice: 1325.50 },
+  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', product: 'INTRADAY', netQty: -15, avgPrice: 1168.20 },
 ];
 
 export default function DashboardPage() {

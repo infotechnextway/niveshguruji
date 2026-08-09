@@ -24,6 +24,7 @@ services:
       APP_PROCESS: api
       NODE_ENV: production
       TZ: Asia/Kolkata
+      HOST: "0.0.0.0"
       API_PORT: "4000"
       MONGO_URI: ${MONGO_URI}
       REDIS_URL: redis://redis:6379
@@ -69,6 +70,7 @@ services:
       APP_PROCESS: engine
       NODE_ENV: production
       TZ: Asia/Kolkata
+      HOST: "0.0.0.0"
       ENGINE_PORT: "4100"
       MONGO_URI: ${MONGO_URI}
       REDIS_URL: redis://redis:6379

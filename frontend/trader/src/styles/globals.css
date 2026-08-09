@@ -28,11 +28,14 @@
   --warn-soft: #FFFAEB;
   --info: #3B82F6;
 
-  /* Brand — cobalt (a considered blue: trust + tech, in both modes) */
-  --accent: #2D5FE8;
-  --accent-hover: #2450C7;
-  --accent-soft: #EAF0FE;
-  --accent-ring: rgba(45, 95, 232, 0.16);
+  /* Brand — NiveshGuru navy + teal (+ gold for highlights) */
+  --brand-navy: #0D2137;
+  --brand-teal: #2BA89A;
+  --brand-gold: #E9A31A;
+  --accent: #2BA89A;
+  --accent-hover: #239185;
+  --accent-soft: #E6F6F4;
+  --accent-ring: rgba(43, 168, 154, 0.18);
 
   /* Effects */
   --shadow-sm: 0 1px 2px rgba(15, 17, 20, 0.04);
@@ -73,10 +76,13 @@
   --warn-soft: #2A1F05;
   --info: #60A5FA;
 
-  --accent: #5680FF;
-  --accent-hover: #7B9AFF;
-  --accent-soft: #131C38;
-  --accent-ring: rgba(86, 128, 255, 0.24);
+  --brand-navy: #0D2137;
+  --brand-teal: #2BA89A;
+  --brand-gold: #E9A31A;
+  --accent: #2BA89A;
+  --accent-hover: #3BC4B3;
+  --accent-soft: #102826;
+  --accent-ring: rgba(43, 168, 154, 0.28);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -339,17 +345,8 @@ html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__item {
   height: 32px;
   border-radius: 8px;
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  position: relative;
-}
-.pts-sidebar__mark::after {
-  content: '';
-  position: absolute;
-  inset: 7px 7px auto auto;
-  width: 6px;
-  height: 6px;
-  background: var(--panel);
-  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 
 .pts-sidebar__brand-text {
@@ -366,12 +363,45 @@ html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__item {
   letter-spacing: 0.08em;
   white-space: nowrap;
 }
+.pts-sidebar__brand-name .ng-wordmark__nivesh { color: var(--brand-navy); }
+[data-theme="dark"] .pts-sidebar__brand-name .ng-wordmark__nivesh { color: var(--text); }
+.pts-sidebar__brand-name .ng-wordmark__guru { color: var(--brand-teal); }
 .pts-sidebar__brand-sub {
   font-weight: 500;
   font-size: 9px;
   letter-spacing: 0.16em;
   color: var(--text-dim);
   white-space: nowrap;
+}
+
+/* NiveshGuru wordmark / lockup */
+.ng-wordmark {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+.ng-wordmark--compact { font-size: 12px; letter-spacing: 0.08em; }
+.ng-wordmark__nivesh { color: var(--brand-navy); }
+[data-theme="dark"] .ng-wordmark__nivesh { color: var(--text); }
+.ng-wordmark__guru { color: var(--brand-teal); }
+.ng-lockup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ng-lockup__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.ng-lockup__tag {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
 }
 .pts-sidebar[data-collapsed='true'] .pts-sidebar__brand-text { display: none; }
 
@@ -486,17 +516,8 @@ html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__item {
   height: 28px;
   border-radius: 6px;
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  position: relative;
-}
-.admin-sb__mark::after {
-  content: '';
-  position: absolute;
-  inset: 6px 6px auto auto;
-  width: 6px;
-  height: 6px;
-  background: var(--panel);
-  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 .admin-sb__brand-text {
   display: flex;
@@ -861,6 +882,13 @@ button.bottom-nav__item {
     max-height: none;
     border-right: none;
     border-bottom: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+  .wt--mobile-list .wt-list {
+    overflow-x: hidden;
   }
   .wt--mobile-list .wt-center {
     display: none !important;

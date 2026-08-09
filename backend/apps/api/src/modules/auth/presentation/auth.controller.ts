@@ -35,6 +35,8 @@ function statusFor(code: string, fallback: HttpStatus): HttpStatus {
       return HttpStatus.UNAUTHORIZED;
     case 'SUSPENDED':
     case 'VERIFICATION_PENDING':
+    case 'APPROVAL_PENDING':
+    case 'REJECTED':
       return HttpStatus.FORBIDDEN;
     case 'NOT_FOUND':
       return HttpStatus.NOT_FOUND;

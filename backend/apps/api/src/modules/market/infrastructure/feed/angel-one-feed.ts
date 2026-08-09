@@ -46,7 +46,13 @@ export class AngelOneFeed implements MarketFeed {
     this.stopped = false;
     this.unsubCreds = this.credentials.onChange(() => {
       this.logger.log('Angel credentials changed — reconnecting feed');
-      this.ws?.close();
+      if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
+        this.ws.close();
+        return;
+      }
+      if (!this.stopped && this.credentials.isConfigured()) {
+        void this.connect();
+      }
     });
     if (!this.credentials.isConfigured()) {
       this.logger.warn('Angel feed started without full credentials — waiting for admin setup');
@@ -179,8 +185,14 @@ export class AngelOneFeed implements MarketFeed {
     }
   }
 
+  /**
+   * Rebuild routes and re-send subscribe after reconnect.
+   * Must clear subscribedKeys first — otherwise subscribe() treats every key as
+   * already subscribed and returns without rebuilding tokenRoutes.
+   */
   private async resubscribeAll(): Promise<void> {
     const keys = [...this.subscribedKeys];
+    this.subscribedKeys.clear();
     this.tokenRoutes.clear();
     await this.subscribe(keys);
   }

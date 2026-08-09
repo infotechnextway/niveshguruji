@@ -43,9 +43,9 @@ export function AppTopbar({
     <header className="tb">
       <div className="tb-row">
         <div className="tb-markets" aria-label="Market indices">
-          <Ticker label="NIFTY 50" q={nifty} />
+          <Ticker label="NIFTY 50" shortLabel="NIFTY" q={nifty} />
           <span className="tb-sep" aria-hidden />
-          <Ticker label="BANKNIFTY" q={bnifty} />
+          <Ticker label="BANKNIFTY" shortLabel="BANKNIFTY" q={bnifty} />
         </div>
 
         <div className="tb-right" ref={panelRef}>
@@ -84,22 +84,15 @@ export function AppTopbar({
           display: flex; align-items: center; gap: 12px;
           padding: 0 20px; min-height: 56px;
         }
-        .tb-menu {
-          place-items: center;
-          width: 44px; height: 44px; min-width: 44px;
-          border-radius: var(--r); color: var(--text-dim); flex-shrink: 0;
-        }
-        .tb-menu:hover { color: var(--text); background: var(--panel-2); }
-
         .tb-markets {
           display: flex; align-items: center; gap: 16px;
-          flex: 1; min-width: 0; overflow-x: auto;
-          scrollbar-width: none;
+          flex: 1; min-width: 0;
         }
-        .tb-markets::-webkit-scrollbar { display: none; }
         .tb-sep { width: 1px; height: 16px; background: var(--line); flex-shrink: 0; }
-
-        .tb-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: auto; position: relative; }
+        .tb-right {
+          display: flex; align-items: center; gap: 4px;
+          flex-shrink: 0; margin-left: auto; position: relative;
+        }
         .tb-icon {
           position: relative; display: grid; place-items: center;
           width: 40px; height: 40px; color: var(--text-dim); border-radius: var(--r);
@@ -129,8 +122,11 @@ export function AppTopbar({
         @media (max-width: 900px) {
           .tb-row { padding: 0 12px; gap: 8px; }
         }
-        @media (max-width: 520px) {
-          .tb-markets { gap: 12px; }
+        @media (max-width: 640px) {
+          .tb-row { padding: 0 10px; min-height: 48px; gap: 6px; }
+          .tb-markets { gap: 8px; }
+          .tb-sep { height: 22px; }
+          .tb-icon { width: 36px; height: 36px; }
           .tb-notif { width: min(280px, calc(100vw - 24px)); }
         }
       `}</style>
@@ -138,23 +134,49 @@ export function AppTopbar({
   );
 }
 
-function Ticker({ label, q }: { label: string; q?: import('@/lib/types').Quote }) {
+function Ticker({
+  label,
+  shortLabel,
+  q,
+}: {
+  label: string;
+  shortLabel: string;
+  q?: import('@/lib/types').Quote;
+}) {
   const ltp = q?.ltp;
   const change = q?.change ?? 0;
   const changePct = q?.changePct ?? 0;
   const cls = signClass(change);
   return (
     <div className="tk">
-      <span className="tk-label">{label}</span>
+      <span className="tk-label tk-label-full">{label}</span>
+      <span className="tk-label tk-label-short">{shortLabel}</span>
       <span className="tk-ltp num">{ltp != null ? price(ltp) : '—'}</span>
       <span className={`tk-chg num ${cls}`}>
-        {q ? `${change >= 0 ? '+' : ''}${change.toFixed(2)} (${pct(changePct, false)})` : '—'}
+        <span className="tk-chg-abs">{q ? `${change >= 0 ? '+' : ''}${change.toFixed(2)} ` : ''}</span>
+        <span className="tk-chg-pct">{q ? `(${pct(changePct, false)})` : '—'}</span>
       </span>
       <style jsx>{`
-        .tk { display: flex; align-items: baseline; gap: 8px; font-size: 12px; white-space: nowrap; }
+        .tk {
+          display: flex; align-items: baseline; gap: 8px;
+          font-size: 12px; white-space: nowrap; min-width: 0;
+        }
         .tk-label { color: var(--text-dim); font-weight: 600; letter-spacing: 0.04em; font-size: 11px; }
+        .tk-label-short { display: none; }
         .tk-ltp { font-weight: 500; color: var(--text); }
         .tk-chg { font-size: 11px; }
+        @media (max-width: 640px) {
+          .tk {
+            flex: 1 1 0; min-width: 0;
+            flex-direction: column; align-items: flex-start; gap: 1px;
+            white-space: normal;
+          }
+          .tk-label-full { display: none; }
+          .tk-label-short { display: inline; font-size: 10px; }
+          .tk-ltp { font-size: 12px; line-height: 1.2; }
+          .tk-chg { font-size: 10px; }
+          .tk-chg-abs { display: none; }
+        }
       `}</style>
     </div>
   );

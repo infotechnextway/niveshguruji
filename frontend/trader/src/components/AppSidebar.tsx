@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Icon } from './Icons';
 import { TRADER_NAV, isNavActive } from '@/lib/nav';
 import { clearSession } from '@/lib/auth';
+import { BrandMark, BrandMonogram, BrandWordmark } from '@/components/BrandLogo';
 
 type Props = {
   collapsed: boolean;
@@ -38,11 +39,11 @@ export function AppSidebar({
       aria-label="Primary"
     >
       <div className="pts-sidebar__top">
-        <Link href="/dashboard" className="pts-sidebar__brand" aria-label="RIDGELINE CAPITAL home" onClick={onNavigate}>
-          <span className="pts-sidebar__mark" aria-hidden />
+        <Link href="/dashboard" className="pts-sidebar__brand" aria-label="NiveshGuru home" onClick={onNavigate}>
+          {iconOnly ? <BrandMonogram size={32} className="pts-sidebar__mark" /> : <BrandMark size={32} className="pts-sidebar__mark" />}
           <span className="pts-sidebar__brand-text">
-            <span className="pts-sidebar__brand-name">RIDGELINE</span>
-            <span className="pts-sidebar__brand-sub">CAPITAL</span>
+            <span className="pts-sidebar__brand-name"><BrandWordmark compact /></span>
+            <span className="pts-sidebar__brand-sub">INVESTMENT · SIMPLIFIED</span>
           </span>
         </Link>
         <button

@@ -24,6 +24,10 @@ export class RoleCacheService implements OnModuleInit {
         { upsert: true },
       );
     }
+    // Additive grant for roles that already existed before users.approve was added.
+    for (const key of ['ADMIN', 'SUPPORT', 'KYC'] as const) {
+      await this.roles.updateOne({ key }, { $addToSet: { permissions: 'users.approve' } });
+    }
     await this.refresh();
     const timer = setInterval(() => void this.refresh().catch((e) => this.logger.error(e.message)), 60_000);
     timer.unref();

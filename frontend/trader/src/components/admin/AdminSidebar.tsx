@@ -54,9 +54,16 @@ export function AdminSidebar() {
   return (
     <aside className="admin-sb" aria-label="Admin">
       <div className="admin-sb__brand">
-        <span className="admin-sb__mark" aria-hidden />
+          {/* chart mark for admin chrome */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/icon.png" alt="" aria-hidden className="admin-sb__mark" width={28} height={28} />
         <div className="admin-sb__brand-text">
-          <span className="admin-sb__brand-name">RIDGELINE</span>
+          <span className="admin-sb__brand-name">
+            <span className="ng-wordmark ng-wordmark--compact">
+              <span className="ng-wordmark__nivesh">NIVESH</span>
+              <span className="ng-wordmark__guru">GURU</span>
+            </span>
+          </span>
           <span className="admin-sb__brand-tag">Admin console</span>
         </div>
       </div>

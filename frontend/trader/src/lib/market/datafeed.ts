@@ -3,8 +3,13 @@ import { api } from '../api';
 import { getSession } from '../auth';
 import type { Instrument, Quote } from '../types';
 
+/**
+ * Lightweight Charts bar.
+ * IMPORTANT: `time` is UNIX **seconds** (UTCTimestamp), not milliseconds.
+ * Charting Library UDF often uses ms; this stack uses lightweight-charts.
+ */
 export interface Bar {
-  time: number; // unix seconds
+  time: number;
   open: number;
   high: number;
   low: number;
@@ -44,12 +49,14 @@ type SearchCallback = (items: Array<{
   exchange: string; ticker: string; type: string;
 }>) => void;
 
+const CHART_DEBUG = typeof process !== 'undefined'
+  && process.env.NEXT_PUBLIC_CHART_DEBUG === '1';
+
 function wsUrl(): string {
   if (typeof window === 'undefined') return '';
   const env = process.env.NEXT_PUBLIC_WS_URL;
   if (env) return env;
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  // Dev: engine on 4100; prod: same host /ws via nginx
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return `${proto}://localhost:4100/ws`;
   }
@@ -63,30 +70,136 @@ function resolutionToInterval(res: string): string {
   return '1minute';
 }
 
+function resolutionBucketSec(resolution: string): number {
+  if (resolution === '5') return 300;
+  if (resolution === '15') return 900;
+  if (resolution === '60') return 3600;
+  return 60;
+}
+
 /** Bar open time (unix sec) for a resolution — aligned to interval bucket. */
 export function barBucketSec(resolution: string, tsMs: number): number {
   const s = Math.floor(tsMs / 1000);
-  if (resolution === '5') return s - (s % 300);
-  if (resolution === '15') return s - (s % 900);
-  if (resolution === '60') return s - (s % 3600);
-  return s - (s % 60);
+  const bucket = resolutionBucketSec(resolution);
+  return s - (s % bucket);
 }
 
-function toBar(c: { t: number; o: number; h: number; l: number; c: number; v?: number }): Bar {
+/** NSE cash/F&O tick → Charting-Library-compatible pricescale / LWC minMove. */
+export function pricescaleFromTick(tickSize?: number, segment?: string): number {
+  let tick = tickSize ?? 0.05;
+  // Upstox master sometimes stores tick in paise (5 ⇒ ₹0.05).
+  if (tick >= 1) tick /= 100;
+  if (!(tick > 0) || !Number.isFinite(tick)) {
+    tick = segment === 'CUR' ? 0.0025 : 0.05;
+  }
+  const scale = Math.round(1 / tick);
+  return Math.max(1, scale);
+}
+
+export function isValidBar(b: Bar): boolean {
+  const { time, open: o, high: h, low: l, close: c } = b;
+  if (!Number.isFinite(time) || time <= 0) return false;
+  if (![o, h, l, c].every((n) => Number.isFinite(n) && n > 0)) return false;
+  if (h < l) return false;
+  if (h + 1e-9 < Math.max(o, c) || l - 1e-9 > Math.min(o, c)) return false;
+  if (b.volume != null && (!Number.isFinite(b.volume) || b.volume < 0)) return false;
+  return true;
+}
+
+function normalizeBar(b: Bar): Bar {
   return {
-    time: Math.floor(c.t / 1000),
-    open: c.o, high: c.h, low: c.l, close: c.c,
-    volume: c.v,
+    time: Math.floor(b.time),
+    open: b.open,
+    high: Math.max(b.high, b.open, b.close),
+    low: Math.min(b.low, b.open, b.close),
+    close: b.close,
+    volume: b.volume != null && Number.isFinite(b.volume) ? b.volume : 0,
   };
 }
 
 /**
+ * Reject invalid candles, sort oldest→newest, dedupe timestamps (keep last),
+ * drop price outliers that create giant wicks when mixed with live LTP.
+ */
+export function validateBars(bars: Bar[], opts?: { fromSec?: number; toSec?: number; refPrice?: number }): Bar[] {
+  const cleaned: Bar[] = [];
+  for (const raw of bars) {
+    if (!isValidBar(raw)) continue;
+    const b = normalizeBar(raw);
+    if (opts?.fromSec != null && b.time < opts.fromSec) continue;
+    if (opts?.toSec != null && b.time > opts.toSec) continue;
+    cleaned.push(b);
+  }
+  cleaned.sort((a, b) => a.time - b.time);
+
+  const deduped: Bar[] = [];
+  for (const b of cleaned) {
+    const prev = deduped[deduped.length - 1];
+    if (prev && prev.time === b.time) deduped[deduped.length - 1] = b;
+    else deduped.push(b);
+  }
+
+  if (deduped.length < 8) return deduped;
+
+  const closes = deduped.map((b) => b.close).sort((a, b) => a - b);
+  const median = opts?.refPrice && opts.refPrice > 0
+    ? opts.refPrice
+    : closes[Math.floor(closes.length / 2)];
+  if (!(median > 0)) return deduped;
+
+  const lo = median * 0.75;
+  const hi = median * 1.25;
+  const filtered = deduped.filter((b) => {
+    const mid = (b.high + b.low) / 2;
+    return mid >= lo && mid <= hi && b.high <= hi * 1.05 && b.low >= lo * 0.95;
+  });
+  return filtered.length >= Math.max(5, Math.floor(deduped.length * 0.5)) ? filtered : deduped;
+}
+
+function toBar(c: { t: number; o: number; h: number; l: number; c: number; v?: number }): Bar {
+  let t = Number(c.t);
+  // API returns epoch ms; LWC needs seconds.
+  if (t > 1e11) t = Math.floor(t / 1000);
+  else t = Math.floor(t);
+  return {
+    time: t,
+    open: Number(c.o),
+    high: Number(c.h),
+    low: Number(c.l),
+    close: Number(c.c),
+    volume: Number(c.v ?? 0),
+  };
+}
+
+function logBarsDebug(label: string, bars: Bar[]): void {
+  if (!bars.length) {
+    console.info(`[chart:${label}] no bars`);
+    return;
+  }
+  let min = Infinity;
+  let max = -Infinity;
+  for (const b of bars) {
+    min = Math.min(min, b.low);
+    max = Math.max(max, b.high);
+  }
+  console.info(`[chart:${label}] count=${bars.length} min=${min} max=${max} firstTs=${bars[0].time} lastTs=${bars[bars.length - 1].time}`);
+  if (CHART_DEBUG) {
+    console.table(bars.slice(-40).map((b) => ({
+      time: b.time,
+      iso: new Date(b.time * 1000).toISOString(),
+      open: b.open,
+      high: b.high,
+      low: b.low,
+      close: b.close,
+      volume: b.volume,
+    })));
+  }
+}
+
+/**
  * TradingView-shaped DataFeed adapter backed by PTS market REST + engine /ws.
- * Exposes onReady, resolveSymbol, searchSymbols, getBars, subscribeBars,
- * unsubscribeBars without requiring the Charting Library license.
- *
  * Chart stack: lightweight-charts renders candles; this class is the data layer.
- * Env: NEXT_PUBLIC_API_ORIGIN (REST proxy target), NEXT_PUBLIC_WS_URL (engine /ws).
+ * History source is Upstox REST (not TrueData) — mapping: [ts,o,h,l,c,v].
  */
 export class UpstoxDataFeed {
   private socket: WebSocket | null = null;
@@ -129,8 +242,7 @@ export class UpstoxDataFeed {
     const key = decodeURIComponent(symbolName);
     api<Instrument & { tickSize?: number }>(`/market/instruments/${encodeURIComponent(key)}`)
       .then((inst) => {
-        const tick = inst.tickSize ?? 0.05;
-        const pricescale = tick > 0 ? Math.round(1 / tick) : 100;
+        const pricescale = pricescaleFromTick(inst.tickSize, inst.segment);
         onResolve({
           ticker: inst.instrumentKey,
           name: inst.symbol,
@@ -165,8 +277,12 @@ export class UpstoxDataFeed {
       || ('ticker' in symbolInfo && symbolInfo.ticker)
       || '';
     if (!key) { onError('missing instrument'); return; }
-    const from = periodParams.from * 1000;
-    const to = periodParams.to * 1000;
+
+    // TradingView periodParams.from/to are UNIX seconds.
+    const fromSec = periodParams.from;
+    const toSec = periodParams.to;
+    const from = fromSec * 1000;
+    const to = toSec * 1000;
     const interval = resolutionToInterval(resolution);
     const qs = new URLSearchParams({
       instrumentKey: key,
@@ -177,7 +293,9 @@ export class UpstoxDataFeed {
     });
     api<Array<{ t: number; o: number; h: number; l: number; c: number; v?: number }>>(`/market/candles?${qs}`)
       .then((rows) => {
-        const bars = rows.map(toBar).sort((a, b) => a.time - b.time);
+        const raw = rows.map(toBar);
+        const bars = validateBars(raw, { fromSec, toSec });
+        logBarsDebug(`getBars:${key}:${resolution}`, bars);
         onResult(bars, { noData: bars.length === 0 });
       })
       .catch((err) => onError(err instanceof Error ? err.message : 'getBars failed'));
@@ -198,7 +316,7 @@ export class UpstoxDataFeed {
       instrumentKey: key,
       resolution,
       cb: onTick,
-      lastBar: seedBar,
+      lastBar: seedBar && isValidBar(seedBar) ? normalizeBar(seedBar) : undefined,
     });
     void this.ensureSocket()
       .then(() => this.send({ action: 'subscribe', instrumentKeys: [key] }))
@@ -273,8 +391,6 @@ export class UpstoxDataFeed {
         } catch { /* ignore */ }
       };
       ws.onerror = () => {
-        // Log only — onclose follows and handles reject/reconnect. Avoids duplicate
-        // reject + unhandled rejection that trips the Next.js error overlay.
         console.warn(
           '[UpstoxDataFeed] WebSocket error — is the engine running?',
           wsUrl(),
@@ -296,13 +412,23 @@ export class UpstoxDataFeed {
     return this.connectPromise;
   }
 
+  /**
+   * Live ticks update ONLY the latest bucket:
+   * - same timestamp → mutate OHLC of current candle
+   * - newer timestamp → open a new candle
+   * - older timestamp → ignore (never rewrite history)
+   */
   private handleQuote(q: Quote): void {
     for (const h of this.quoteHandlers) h(q);
+    if (!Number.isFinite(q.ltp) || q.ltp <= 0) return;
 
     for (const sub of this.barSubs.values()) {
       if (sub.instrumentKey !== q.instrumentKey) continue;
       const t = barBucketSec(sub.resolution, q.ts);
       const last = sub.lastBar;
+
+      if (last && t < last.time) continue;
+
       if (last && last.time === t) {
         const next: Bar = {
           time: t,
@@ -310,12 +436,21 @@ export class UpstoxDataFeed {
           high: Math.max(last.high, q.ltp),
           low: Math.min(last.low, q.ltp),
           close: q.ltp,
-          volume: (last.volume ?? 0) + 0,
+          volume: last.volume ?? 0,
         };
+        if (!isValidBar(next)) continue;
+        // Guard against a bad LTP jumping the whole scale (wrong symbol feed).
+        const mid = (last.high + last.low) / 2;
+        if (mid > 0 && (q.ltp > mid * 1.25 || q.ltp < mid * 0.75)) continue;
         sub.lastBar = next;
         sub.cb(next);
       } else {
         const next: Bar = { time: t, open: q.ltp, high: q.ltp, low: q.ltp, close: q.ltp, volume: 0 };
+        if (!isValidBar(next)) continue;
+        if (last && last.close > 0 && (q.ltp > last.close * 1.25 || q.ltp < last.close * 0.75)) {
+          // Skip opening a new bar from a polluted tick.
+          continue;
+        }
         sub.lastBar = next;
         sub.cb(next);
       }

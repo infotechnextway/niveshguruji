@@ -3,6 +3,7 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { adminLogin, AuthError, setEmployeeSession } from '@/lib/auth';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { BrandLockup } from '@/components/BrandLogo';
 
 function AdminLoginForm() {
   const router = useRouter();
@@ -55,11 +56,8 @@ function AdminLoginForm() {
       <div className="alp-tt"><ThemeToggle /></div>
       <div className="alp-card card-lg">
         <div className="alp-brand">
-          <span className="brand-mark" aria-hidden />
-          <div className="vstack">
-            <span className="brand-name">RIDGELINE CAPITAL</span>
-            <span className="brand-tag">Admin console</span>
-          </div>
+          <BrandLockup height={52} />
+          <span className="brand-tag">Admin console</span>
         </div>
         <h1 className="alp-title">Admin sign in</h1>
         <p className="dim" style={{ fontSize: 12, marginTop: -12 }}>
@@ -74,7 +72,7 @@ function AdminLoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@ridgeline.local"
+              placeholder="admin@niveshguru.local"
               autoComplete="username"
             />
           </div>

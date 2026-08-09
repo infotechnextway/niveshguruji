@@ -1,5 +1,7 @@
 'use client';
 
+import { apiBase } from './api-base';
+
 export interface Session {
   accessToken: string;
   refreshToken: string;
@@ -116,11 +118,21 @@ export function clearEmployeeSession(): void {
   localStorage.removeItem(K_EMP_USER);
 }
 
+/** True when the user clicked “Try the demo dashboard” (explicit flag). */
+export function isDemoSession(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(K_DEMO) === '1';
+}
+
+/** Demo UI or no trader token yet (used by pages that render static demo data). */
 export function isDemoMode(): boolean {
   if (typeof window === 'undefined') return false;
-  return localStorage.getItem(K_DEMO) === '1' || !localStorage.getItem(K_ACCESS);
+  return isDemoSession() || !localStorage.getItem(K_ACCESS);
 }
-export function enterDemoMode(): void { localStorage.setItem(K_DEMO, '1'); }
+export function enterDemoMode(): void {
+  clearSession();
+  localStorage.setItem(K_DEMO, '1');
+}
 export function exitDemoMode(): void { localStorage.removeItem(K_DEMO); }
 
 /** True when a valid employee JWT is stored for admin API calls. */
@@ -153,9 +165,46 @@ export interface TraderProfile {
   username?: string;
 }
 
+export interface RegisterInput {
+  name: string;
+  email: string;
+  mobile: string;
+  username: string;
+  password: string;
+  address: string;
+  incomeType: 'SALARIED' | 'OWN';
+  monthlyIncome: number;
+  referredBy?: string;
+}
+
+/** POST /auth/register — creates PENDING_APPROVAL account (no session). */
+export async function traderRegister(input: RegisterInput): Promise<{ userId: string }> {
+  const res = await fetch(`${apiBase()}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok || body.success === false) {
+    const code = body?.error?.code ?? 'HTTP_ERROR';
+    const message = body?.error?.message ?? `Registration failed (${res.status})`;
+    throw new AuthError(code, message, res.status);
+  }
+  return body.data as { userId: string };
+}
+
+/** Normalize 10-digit Indian mobile to +91XXXXXXXXXX. */
+export function toE164Mobile(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length === 10) return `+91${digits}`;
+  if (digits.length === 12 && digits.startsWith('91')) return `+${digits}`;
+  if (raw.trim().startsWith('+91') && digits.length === 12) return `+${digits}`;
+  return raw.trim();
+}
+
 /** POST /auth/login — does not use api() because no session exists yet. */
 export async function traderLogin(identifier: string, password: string): Promise<TraderLoginResult> {
-  const res = await fetch('/api/v1/auth/login', {
+  const res = await fetch(`${apiBase()}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ identifier: identifier.trim(), password }),
@@ -175,7 +224,7 @@ export async function traderLogin(identifier: string, password: string): Promise
 
 /** GET /auth/me — fetch profile after login to populate session user. */
 export async function fetchTraderProfile(accessToken: string): Promise<TraderProfile> {
-  const res = await fetch('/api/v1/auth/me', {
+  const res = await fetch(`${apiBase()}/auth/me`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   const body = await res.json().catch(() => ({}));
@@ -193,7 +242,7 @@ export async function adminLogin(
   password: string,
   totpCode?: string,
 ): Promise<AdminLoginResult> {
-  const res = await fetch('/api/v1/admin/auth/login', {
+  const res = await fetch(`${apiBase()}/admin/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

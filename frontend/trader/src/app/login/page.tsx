@@ -3,6 +3,7 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { traderLogin, fetchTraderProfile, AuthError, setSession, enterDemoMode, exitDemoMode } from '@/lib/auth';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { BrandLockup } from '@/components/BrandLogo';
 
 function safeNext(raw: string | null): string {
   if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/dashboard';
@@ -44,6 +45,10 @@ function LoginInner() {
           setErr('Invalid email/username or password.');
         } else if (e.code === 'SUSPENDED') {
           setErr('Account suspended. Contact support.');
+        } else if (e.code === 'APPROVAL_PENDING') {
+          setErr('Your account is awaiting admin approval. Try again after it is activated.');
+        } else if (e.code === 'REJECTED') {
+          setErr('Registration was not approved. Contact support.');
         } else if (e.code === 'VERIFICATION_PENDING') {
           setErr('Complete mobile and email verification before signing in.');
         } else {
@@ -67,11 +72,7 @@ function LoginInner() {
       <div className="lp-tt"><ThemeToggle /></div>
       <div className="lp-card card-lg">
         <div className="lp-brand">
-          <span className="brand-mark" aria-hidden />
-          <div className="vstack">
-            <span className="brand-name">RIDGELINE CAPITAL</span>
-            <span className="brand-tag">Paper trading · Structured evaluations</span>
-          </div>
+          <BrandLockup height={52} />
         </div>
         <h1 className="lp-title">Welcome back</h1>
         <p className="dim" style={{ fontSize: 12, marginTop: -12 }}>Sign in to continue your evaluation.</p>
@@ -94,7 +95,7 @@ function LoginInner() {
           {busy ? 'Opening…' : 'Try the demo dashboard'}
         </button>
         <p className="dim" style={{ textAlign: 'center', fontSize: 11, marginTop: 8 }}>
-          New here? <a href="#" style={{ color: 'var(--accent)' }}>Create an account</a>
+          New here? <a href="/register" style={{ color: 'var(--accent)' }}>Create an account</a>
           {' · '}
           <a href="/admin/login" style={{ color: 'var(--accent)' }}>Admin</a>
         </p>
@@ -103,11 +104,7 @@ function LoginInner() {
         .lp { min-height: 100vh; display: grid; place-items: center; background: var(--bg); padding: 24px; position: relative; }
         .lp-tt { position: absolute; top: 24px; right: 24px; }
         .lp-card { width: 100%; max-width: 400px; padding: 32px; display: flex; flex-direction: column; gap: 16px; }
-        .lp-brand { display: flex; align-items: center; gap: 12px; padding-bottom: 8px; }
-        .brand-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); position: relative; }
-        .brand-mark::after { content: ''; position: absolute; inset: 7px 7px auto auto; width: 6px; height: 6px; background: var(--panel); border-radius: 50%; }
-        .brand-name { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
-        .brand-tag { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+        .lp-brand { display: flex; align-items: center; padding-bottom: 8px; }
         .lp-title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
         .lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
         .err { padding: 8px 12px; background: var(--loss-soft); color: var(--loss); border-radius: var(--r); font-size: 12px; }

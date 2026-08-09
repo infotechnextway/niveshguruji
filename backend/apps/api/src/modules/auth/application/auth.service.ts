@@ -11,7 +11,7 @@ import { PasswordService } from '../infrastructure/password.service';
 import { TokenService } from '../infrastructure/token.service';
 import { OtpService } from '../infrastructure/otp.service';
 import { MAIL_SENDER, MailSender } from '../infrastructure/mail/mail.port';
-import { RequestContext, TokenPair, UserStatus } from '../domain/auth.types';
+import { IncomeType, RequestContext, TokenPair, UserStatus } from '../domain/auth.types';
 
 export interface RegisterInput {
   name: string;
@@ -19,6 +19,9 @@ export interface RegisterInput {
   mobile: string;
   username: string;
   password: string;
+  address: string;
+  incomeType: 'SALARIED' | 'OWN';
+  monthlyIncome: number;
   referredBy?: string;
 }
 
@@ -57,13 +60,23 @@ export class AuthService {
       username: input.username,
       usernameLower,
       passwordHash: await this.passwords.hash(input.password),
+      address: input.address.trim(),
+      incomeType: input.incomeType as IncomeType,
+      monthlyIncome: input.monthlyIncome,
       referralCode: randomBytes(5).toString('hex').toUpperCase(),
       referredBy: input.referredBy,
-      status: UserStatus.PENDING_MOBILE,
+      status: UserStatus.PENDING_APPROVAL,
     });
 
-    const issued = await this.otp.issue(input.mobile, 'MOBILE_VERIFY');
-    if (issued.isFail) return Result.fail(issued.error);
+    await this.audit.record({
+      actorType: 'USER',
+      actorId: user.id,
+      action: 'USER_REGISTERED',
+      entity: 'user',
+      entityId: user.id,
+      after: { status: UserStatus.PENDING_APPROVAL, email, username: input.username },
+    });
+
     return Result.ok({ userId: user.id });
   }
 
@@ -120,7 +133,8 @@ export class AuthService {
     }
     if (!user.emailVerified) {
       user.emailVerified = true;
-      if (user.status === UserStatus.PENDING_EMAIL) user.status = UserStatus.ACTIVE;
+      // Legacy OTP path: after email verify, wait for admin approval (not auto-ACTIVE).
+      if (user.status === UserStatus.PENDING_EMAIL) user.status = UserStatus.PENDING_APPROVAL;
       await user.save();
     }
     return Result.ok({ status: user.status });
@@ -144,6 +158,16 @@ export class AuthService {
     if (user.status === UserStatus.SUSPENDED) {
       await this.recordLogin(user.id, false, ctx, 'SUSPENDED');
       return Result.fail(DomainError.of('SUSPENDED', 'Account suspended. Contact support.'));
+    }
+    if (user.status === UserStatus.REJECTED) {
+      await this.recordLogin(user.id, false, ctx, 'REJECTED');
+      return Result.fail(DomainError.of('REJECTED', 'Registration was not approved. Contact support.'));
+    }
+    if (user.status === UserStatus.PENDING_APPROVAL) {
+      await this.recordLogin(user.id, false, ctx, 'PENDING_APPROVAL');
+      return Result.fail(
+        DomainError.of('APPROVAL_PENDING', 'Your account is awaiting admin approval', { status: user.status }),
+      );
     }
     if (user.status !== UserStatus.ACTIVE) {
       await this.recordLogin(user.id, false, ctx, `STATUS_${user.status}`);
@@ -263,7 +287,10 @@ export class AuthService {
   }
 
   async me(userId: string) {
-    return this.users.findById(userId).select('name email mobile username status kycStatus referralCode createdAt').lean();
+    return this.users
+      .findById(userId)
+      .select('name email mobile username address incomeType monthlyIncome status kycStatus referralCode createdAt')
+      .lean();
   }
 
   // ---------------- Internals ----------------

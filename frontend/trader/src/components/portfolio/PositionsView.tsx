@@ -5,8 +5,8 @@ import { price, signClass } from '@/lib/format';
 import { TradeToast } from '@/components/trading/TradeToast';
 
 const DEMO = [
-  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', product: 'MIS', netQty: 20, avgPrice: 2884.50 },
-  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', product: 'MIS', netQty: -15, avgPrice: 1495.20 },
+  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', product: 'MIS', netQty: 20, avgPrice: 1325.50 },
+  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', product: 'MIS', netQty: -15, avgPrice: 1168.20 },
 ];
 
 /** Open positions table + MTM summary (logic unchanged from /positions). */
@@ -41,7 +41,7 @@ export function PositionsView() {
         </strong>
       </div>
 
-      <div className="card">
+      <div className="card table-wrap">
         <table>
           <thead>
             <tr>
@@ -74,10 +74,52 @@ export function PositionsView() {
           </tbody>
         </table>
       </div>
+
+      <div className="cards" aria-label="Positions">
+        {withMtm.map((p) => (
+          <article key={p.instrumentKey} className="pos-card">
+            <div className="pc-top">
+              <div className="pc-sym">
+                <strong>{p.symbol}</strong>
+                <span className="muted">
+                  {p.product} · {p.netQty < 0 ? 'SHORT' : 'LONG'} {Math.abs(p.netQty)}
+                </span>
+              </div>
+              <button type="button" className="exit" onClick={() => exit(p.instrumentKey, p.symbol)}>
+                Exit
+              </button>
+            </div>
+            <div className="pc-grid">
+              <div>
+                <span className="lbl">Avg</span>
+                <strong className="num">{price(p.avgPrice)}</strong>
+              </div>
+              <div>
+                <span className="lbl">LTP</span>
+                <strong className="num">{price(p.ltp)}</strong>
+              </div>
+              <div>
+                <span className="lbl">MTM</span>
+                <strong className={`num ${signClass(p.pnl)}`}>
+                  {p.pnl >= 0 ? '+' : ''}{p.pnl.toFixed(2)}
+                </strong>
+              </div>
+              <div>
+                <span className="lbl">P&amp;L</span>
+                <strong className={`num ${signClass(p.pnl)}`}>
+                  {p.pnl >= 0 ? '+' : ''}{p.pnl.toFixed(2)}
+                </strong>
+              </div>
+            </div>
+          </article>
+        ))}
+        {withMtm.length === 0 && <div className="empty">No open positions.</div>}
+      </div>
+
       <TradeToast message={toast} onDone={() => setToast(null)} />
       <style jsx>{`
         .pv { display: flex; flex-direction: column; gap: 16px; }
-        .total { text-align: right; align-self: flex-end; }
+        .total { text-align: center; align-self: center; width: 100%; }
         .total span { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); }
         .total strong { font-size: 22px; font-weight: 500; }
         .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: auto; }
@@ -89,9 +131,32 @@ export function PositionsView() {
         .exit {
           padding: 6px 10px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--loss) 40%, var(--line));
           background: color-mix(in srgb, var(--loss) 10%, transparent); color: var(--loss);
-          font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit;
+          font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap;
         }
         .empty { text-align: center; padding: 36px; color: var(--text-faint); }
+        .cards { display: none; }
+        .loss { color: var(--loss); }
+
+        @media (max-width: 700px) {
+          .table-wrap { display: none; }
+          .cards { display: flex; flex-direction: column; gap: 10px; }
+          .pos-card {
+            background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+            padding: 12px 14px; display: flex; flex-direction: column; gap: 10px;
+          }
+          .pc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+          .pc-sym { min-width: 0; }
+          .pc-sym strong { display: block; font-size: 14px; font-weight: 600; }
+          .pc-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px;
+            padding-top: 8px; border-top: 1px solid var(--line-soft);
+          }
+          .pc-grid .lbl {
+            display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-faint); margin-bottom: 2px;
+          }
+          .pc-grid strong { font-size: 13px; font-weight: 500; }
+        }
       `}</style>
     </div>
   );

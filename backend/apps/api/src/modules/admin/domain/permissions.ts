@@ -5,6 +5,7 @@
 export const PERMISSIONS = {
   'users.view': 'View users and their profiles',
   'users.suspend': 'Suspend / unsuspend user accounts',
+  'users.approve': 'Approve or reject user registrations',
   'kyc.view': 'View KYC applications and documents',
   'kyc.review': 'Claim, approve and reject KYC applications',
   'employees.view': 'View employees',
@@ -30,11 +31,11 @@ export const DEFAULT_ROLES: Record<string, { name: string; permissions: Permissi
   SUPER_ADMIN: { name: 'Super Admin', permissions: ['*'] },
   ADMIN: {
     name: 'Admin',
-    permissions: ['users.view', 'users.suspend', 'kyc.view', 'employees.view', 'audit.view', 'reports.view', 'challenges.view', 'payments.view'],
+    permissions: ['users.view', 'users.suspend', 'users.approve', 'kyc.view', 'employees.view', 'audit.view', 'reports.view', 'challenges.view', 'payments.view'],
   },
   FINANCE: { name: 'Finance', permissions: ['payments.view', 'payments.refund', 'rewards.review', 'reports.view', 'users.view'] },
-  KYC: { name: 'KYC Officer', permissions: ['kyc.view', 'kyc.review', 'users.view'] },
-  SUPPORT: { name: 'Support', permissions: ['users.view', 'support.tickets'] },
+  KYC: { name: 'KYC Officer', permissions: ['kyc.view', 'kyc.review', 'users.view', 'users.approve'] },
+  SUPPORT: { name: 'Support', permissions: ['users.view', 'users.approve', 'support.tickets'] },
   OPERATIONS: { name: 'Operations', permissions: ['plans.manage', 'instruments.manage', 'config.manage', 'users.view', 'reports.view'] },
 };
 

@@ -6,10 +6,10 @@ import { price, pct, signClass } from '@/lib/format';
 interface Holding { instrumentKey: string; symbol: string; qty: number; avgPrice: number; prevClose: number }
 
 const DEMO: Holding[] = [
-  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', qty: 50, avgPrice: 2820.30, prevClose: 2870 },
-  { instrumentKey: 'NSE_EQ|INE467B01029', symbol: 'TCS', qty: 20, avgPrice: 3785.00, prevClose: 3810 },
-  { instrumentKey: 'NSE_EQ|INE040A01034', symbol: 'HDFCBANK', qty: 100, avgPrice: 1602.75, prevClose: 1612 },
-  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', qty: 75, avgPrice: 1480.10, prevClose: 1492 },
+  { instrumentKey: 'NSE_EQ|INE002A01018', symbol: 'RELIANCE', qty: 50, avgPrice: 1310.30, prevClose: 1330 },
+  { instrumentKey: 'NSE_EQ|INE467B01029', symbol: 'TCS', qty: 20, avgPrice: 2410.00, prevClose: 2430 },
+  { instrumentKey: 'NSE_EQ|INE040A01034', symbol: 'HDFCBANK', qty: 100, avgPrice: 728.75, prevClose: 734 },
+  { instrumentKey: 'NSE_EQ|INE009A01021', symbol: 'INFY', qty: 75, avgPrice: 1165.10, prevClose: 1174 },
 ];
 
 /** Delivery holdings table + value/P&L cards (logic unchanged from /holdings). */
@@ -46,7 +46,7 @@ export function HoldingsView() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card table-wrap">
         <table>
           <thead>
             <tr>
@@ -77,6 +77,41 @@ export function HoldingsView() {
           </tbody>
         </table>
       </div>
+
+      <div className="cards" aria-label="Holdings">
+        {rows.map((h) => (
+          <article key={h.instrumentKey} className="hold-card">
+            <div className="hc-top">
+              <strong>{h.symbol}</strong>
+              <span className={`num ${signClass(h.overall)}`}>
+                {h.overall >= 0 ? '+' : ''}{h.overall.toFixed(2)}
+              </span>
+            </div>
+            <div className="hc-sub muted">Qty {h.qty} · {pct(((h.ltp - h.avgPrice) / h.avgPrice) * 100)}</div>
+            <div className="hc-grid">
+              <div>
+                <span className="lbl">Avg</span>
+                <strong className="num">{price(h.avgPrice)}</strong>
+              </div>
+              <div>
+                <span className="lbl">LTP</span>
+                <strong className="num">{price(h.ltp)}</strong>
+              </div>
+              <div>
+                <span className="lbl">Value</span>
+                <strong className="num">{price(h.value)}</strong>
+              </div>
+              <div>
+                <span className="lbl">Today</span>
+                <strong className={`num ${signClass(h.today)}`}>
+                  {h.today >= 0 ? '+' : ''}{h.today.toFixed(2)}
+                </strong>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
       <style jsx>{`
         .hv { display: flex; flex-direction: column; gap: 16px; }
         .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -92,7 +127,29 @@ export function HoldingsView() {
         th.r, td.r { text-align: right; }
         .tiny { font-size: 10px; margin-top: 2px; }
         .muted { color: var(--text-faint); }
-        @media (max-width: 700px) { .stats { grid-template-columns: 1fr; } }
+        .cards { display: none; }
+
+        @media (max-width: 700px) {
+          .stats { grid-template-columns: 1fr; }
+          .table-wrap { display: none; }
+          .cards { display: flex; flex-direction: column; gap: 10px; }
+          .hold-card {
+            background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+            padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;
+          }
+          .hc-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+          .hc-top strong { font-size: 14px; font-weight: 600; }
+          .hc-sub { font-size: 11px; }
+          .hc-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px;
+            margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--line-soft);
+          }
+          .hc-grid .lbl {
+            display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-faint); margin-bottom: 2px;
+          }
+          .hc-grid strong { font-size: 13px; font-weight: 500; }
+        }
       `}</style>
     </div>
   );
