@@ -6,42 +6,76 @@
 
 .nv-root {
   /* Core palette */
-  --nv-ink: #0b1020;         /* deep indigo-black base */
-  --nv-ink-2: #111830;       /* elevated surface */
-  --nv-ink-3: #1a2340;       /* hover / border surface */
-  --nv-ivory: #f5f2ea;       /* warm paper (text on dark) */
-  --nv-ivory-2: #fbf9f4;     /* light section background */
-  --nv-muted: #a3abc9;       /* secondary text on dark */
-  --nv-muted-2: #5a627f;     /* secondary text on light */
+  --nv-ink: #0b1020;
+  --nv-ink-2: #111830;
+  --nv-ink-3: #1a2340;
+  --nv-ivory: #f5f2ea;
+  --nv-ivory-2: #fbf9f4;
+  --nv-muted: #a3abc9;
+  --nv-muted-2: #5a627f;
 
   /* Accents */
-  --nv-gold: #ecb23e;        /* the "guru" signature */
+  --nv-gold: #ecb23e;
   --nv-gold-soft: #f6d38a;
-  --nv-teal: #35c6a5;        /* growth */
-  --nv-indigo: #7c86f2;      /* gradient partner */
+  --nv-teal: #35c6a5;
+  --nv-indigo: #7c86f2;
 
   /* Effects */
   --nv-line: rgba(245, 242, 234, 0.10);
   --nv-line-2: rgba(11, 16, 32, 0.10);
   --nv-glow: 0 0 80px -20px rgba(236, 178, 62, 0.55);
   --nv-radius: 18px;
+  --nv-gutter: clamp(1rem, 4.5vw, 1.5rem);
 
   color: var(--nv-ivory);
   background: var(--nv-ink);
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+
+  /* Prevent horizontal scroll on phones */
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  position: relative;
+}
+
+.nv-root *,
+.nv-root *::before,
+.nv-root *::after {
+  box-sizing: border-box;
+}
+
+.nv-root img,
+.nv-root canvas,
+.nv-root svg,
+.nv-root video {
+  max-width: 100%;
+  height: auto;
 }
 
 /* Typography roles */
-.nv-root h1, .nv-root h2, .nv-root h3, .nv-root .nv-display {
+.nv-root h1,
+.nv-root h2,
+.nv-root h3,
+.nv-root .nv-display {
   font-family: var(--font-fraunces), Georgia, serif;
   font-optical-sizing: auto;
   font-weight: 500;
   letter-spacing: -0.015em;
-  line-height: 1.02;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 .nv-mono { font-family: var(--font-mono), ui-monospace, monospace; }
+
+.nv-root p,
+.nv-root li,
+.nv-root span,
+.nv-root a {
+  overflow-wrap: anywhere;
+}
 
 /* The recurring guiding-star eyebrow */
 .nv-eyebrow {
@@ -54,8 +88,9 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--nv-gold);
+  max-width: 100%;
 }
-.nv-eyebrow::before { content: "\2726"; font-size: 0.9em; }
+.nv-eyebrow::before { content: "\2726"; font-size: 0.9em; flex-shrink: 0; }
 
 /* Gradient text used sparingly on the hero */
 .nv-grad {
@@ -67,11 +102,21 @@
 
 /* Buttons */
 .nv-btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.85rem 1.5rem; border-radius: 999px;
-  font-weight: 600; font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
   transition: transform 0.18s ease, box-shadow 0.25s ease, background 0.2s ease;
-  cursor: pointer; text-decoration: none; border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
 }
 .nv-btn:hover { transform: translateY(-2px); }
 .nv-btn-gold { background: var(--nv-gold); color: #2a1e05; box-shadow: var(--nv-glow); }
@@ -85,6 +130,8 @@
   border: 1px solid var(--nv-line);
   border-radius: var(--nv-radius);
   transition: border-color 0.25s ease, transform 0.25s ease;
+  max-width: 100%;
+  min-width: 0;
 }
 .nv-card:hover { border-color: rgba(236, 178, 62, 0.4); transform: translateY(-4px); }
 
@@ -100,8 +147,76 @@
 .nv-muted { color: var(--nv-muted); }
 
 /* Layout helpers */
-.nv-wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
-.nv-section { padding: clamp(4rem, 9vw, 8rem) 0; }
+.nv-wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: var(--nv-gutter);
+  padding-right: var(--nv-gutter);
+  min-width: 0;
+}
+.nv-section { padding: clamp(3rem, 8vw, 8rem) 0; }
+
+/* Grid utilities — always allow shrink to avoid overflow */
+.nv-hero-grid,
+.nv-stats-grid,
+.nv-cards-2,
+.nv-cards-3,
+.nv-cards-4,
+.nv-plans-grid,
+.nv-contact-grid,
+.nv-feature,
+.nv-footer-grid,
+.nv-step-row {
+  width: 100%;
+  min-width: 0;
+}
+.nv-hero-grid > *,
+.nv-stats-grid > *,
+.nv-cards-2 > *,
+.nv-cards-3 > *,
+.nv-cards-4 > *,
+.nv-plans-grid > *,
+.nv-contact-grid > *,
+.nv-feature > *,
+.nv-footer-grid > *,
+.nv-step-row > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.nv-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.nv-brand-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: min(58vw, 220px);
+}
+
+.nv-orb-frame {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.nv-field {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--nv-line);
+  background: var(--nv-ink);
+  color: var(--nv-ivory);
+  font-size: 1rem;
+  font-family: inherit;
+}
 
 /* Focus visibility (accessibility floor) */
 .nv-root a:focus-visible,
@@ -113,7 +228,10 @@
 
 /* Ambient starfield dots for dark sections */
 .nv-stars {
-  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
   background-image:
     radial-gradient(1.5px 1.5px at 20% 30%, rgba(245,242,234,0.5), transparent),
     radial-gradient(1.5px 1.5px at 70% 60%, rgba(245,242,234,0.35), transparent),
@@ -122,8 +240,120 @@
     radial-gradient(1.5px 1.5px at 55% 15%, rgba(53,198,165,0.4), transparent);
 }
 
+/* ---------- Responsive: tablet ---------- */
+@media (max-width: 900px) {
+  .nv-hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    min-height: 0 !important;
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+  .nv-hero-orb {
+    order: -1;
+    height: 260px !important;
+    min-height: 220px !important;
+  }
+  .nv-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
+  }
+  .nv-cards-3,
+  .nv-cards-4 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+  }
+  .nv-cards-2,
+  .nv-plans-grid,
+  .nv-contact-grid,
+  .nv-feature {
+    grid-template-columns: 1fr !important;
+  }
+  .nv-plans-grid {
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .nv-footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 28px !important;
+  }
+  .nv-footer-brand {
+    grid-column: 1 / -1;
+    max-width: none !important;
+  }
+}
+
+/* ---------- Responsive: phone ---------- */
+@media (max-width: 640px) {
+  .nv-section { padding: 2.75rem 0; }
+
+  .nv-root h1 { font-size: clamp(1.85rem, 8.2vw, 2.6rem) !important; line-height: 1.18; }
+  .nv-root h2 { font-size: clamp(1.45rem, 6.5vw, 2.1rem) !important; line-height: 1.2; }
+  .nv-root h3 { font-size: clamp(1.15rem, 5vw, 1.35rem) !important; line-height: 1.25; }
+
+  .nv-hero-orb {
+    height: 220px !important;
+    min-height: 200px !important;
+  }
+
+  .nv-stats-grid,
+  .nv-cards-3,
+  .nv-cards-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .nv-step-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .nv-footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+    padding-top: 2.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .nv-cta-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .nv-cta-row .nv-btn {
+    width: 100%;
+  }
+
+  .nv-btn {
+    padding: 0.8rem 1.15rem;
+    font-size: 0.92rem;
+  }
+
+  .nv-card:hover { transform: none; }
+  .nv-btn:hover { transform: none; }
+
+  .nv-newsletter-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .nv-newsletter-row input,
+  .nv-newsletter-row .nv-btn {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .nv-brand-text { max-width: 46vw; font-size: 18px !important; }
+  .nv-hero-orb {
+    height: 180px !important;
+    min-height: 160px !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .nv-root *, .nv-root *::before, .nv-root *::after {
+  .nv-root *,
+  .nv-root *::before,
+  .nv-root *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }

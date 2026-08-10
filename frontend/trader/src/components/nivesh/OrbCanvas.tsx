@@ -25,7 +25,7 @@ export function OrbCanvas() {
     <div
       role="img"
       aria-label="An interactive 3D orb orbited by gold coins, representing wealth growing under guidance"
-      style={{ width: "100%", height: "100%" }}
+      style={{ width: "100%", height: "100%", maxWidth: "100%", overflow: "hidden" }}
     >
       <GuruOrb />
     </div>

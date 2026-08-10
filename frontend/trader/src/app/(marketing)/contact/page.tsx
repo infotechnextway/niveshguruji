@@ -21,18 +21,26 @@ export default function ContactPage() {
           display: "grid",
           gridTemplateColumns: "0.9fr 1.1fr",
           gap: 48,
-          padding: "5rem 1.5rem",
+          paddingTop: "clamp(3rem, 8vw, 5rem)",
+          paddingBottom: "clamp(3rem, 8vw, 5rem)",
           alignItems: "start",
         }}
       >
-        {/* Left: intro + details */}
-        <div>
+        <div style={{ minWidth: 0 }}>
           <Reveal>
             <Eyebrow>Contact</Eyebrow>
-            <h1 style={{ fontSize: "clamp(2.4rem, 5vw, 3.6rem)", marginTop: "1.2rem" }}>
+            <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.6rem)", marginTop: "1.2rem" }}>
               Say hello. We read every word.
             </h1>
-            <p className="nv-muted" style={{ marginTop: "1.4rem", fontSize: "1.12rem", lineHeight: 1.6, maxWidth: 420 }}>
+            <p
+              className="nv-muted"
+              style={{
+                marginTop: "1.4rem",
+                fontSize: "clamp(1rem, 2.8vw, 1.12rem)",
+                lineHeight: 1.6,
+                maxWidth: 420,
+              }}
+            >
               Whether you want to book a free check-in or just ask whether this is right for you,
               there’s a real person on the other end.
             </p>
@@ -47,17 +55,12 @@ export default function ContactPage() {
           </Reveal>
         </div>
 
-        {/* Right: form */}
         <Reveal delay={0.15}>
-          <div className="nv-card" style={{ padding: "clamp(1.6rem, 4vw, 2.6rem)" }}>
+          <div className="nv-card" style={{ padding: "clamp(1.25rem, 4vw, 2.6rem)", minWidth: 0 }}>
             <ContactForm />
           </div>
         </Reveal>
       </div>
-
-      <style>{`
-        @media (max-width: 860px) { .nv-contact-grid { grid-template-columns: 1fr !important; } }
-      `}</style>
     </section>
   );
 }
@@ -74,7 +77,7 @@ function ContactLine({
   href?: string;
 }) {
   const inner = (
-    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
       <span
         style={{
           display: "grid",
@@ -89,13 +92,26 @@ function ContactLine({
       >
         {icon}
       </span>
-      <span>
-        <span className="nv-mono nv-muted" style={{ display: "block", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+      <span style={{ minWidth: 0 }}>
+        <span
+          className="nv-mono nv-muted"
+          style={{ display: "block", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase" }}
+        >
           {label}
         </span>
-        <span style={{ fontSize: "1.05rem" }}>{value}</span>
+        <span style={{ fontSize: "1.05rem", display: "block" }}>{value}</span>
       </span>
     </div>
   );
-  return <li>{href ? <a href={href} style={{ textDecoration: "none", color: "inherit" }}>{inner}</a> : inner}</li>;
+  return (
+    <li style={{ minWidth: 0 }}>
+      {href ? (
+        <a href={href} style={{ textDecoration: "none", color: "inherit", display: "block", minWidth: 0 }}>
+          {inner}
+        </a>
+      ) : (
+        inner
+      )}
+    </li>
+  );
 }

@@ -101,15 +101,20 @@ function LoginInner() {
         </p>
       </div>
       <style jsx>{`
-        .lp { min-height: 100vh; display: grid; place-items: center; background: var(--bg); padding: 24px; position: relative; }
-        .lp-tt { position: absolute; top: 24px; right: 24px; }
-        .lp-card { width: 100%; max-width: 400px; padding: 32px; display: flex; flex-direction: column; gap: 16px; }
-        .lp-brand { display: flex; align-items: center; padding-bottom: 8px; }
+        .lp { min-height: 100vh; display: grid; place-items: center; background: var(--bg); padding: 16px; position: relative; overflow-x: hidden; width: 100%; }
+        .lp-tt { position: absolute; top: 16px; right: 16px; z-index: 2; }
+        .lp-card { width: 100%; max-width: 400px; padding: 24px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+        .lp-brand { display: flex; align-items: center; padding-bottom: 8px; max-width: 100%; overflow: hidden; }
         .lp-title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
         .lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
         .err { padding: 8px 12px; background: var(--loss-soft); color: var(--loss); border-radius: var(--r); font-size: 12px; }
         .lp-sep { display: flex; align-items: center; gap: 12px; margin: 4px 0; color: var(--text-faint); font-size: 11px; }
         .lp-sep::before, .lp-sep::after { content: ''; flex: 1; height: 1px; background: var(--line-soft); }
+        @media (max-width: 420px) {
+          .lp { padding: 12px; align-items: start; padding-top: 56px; }
+          .lp-card { padding: 20px 16px; }
+          .lp-title { font-size: 20px; }
+        }
       `}</style>
     </div>
   );

@@ -21,9 +21,10 @@ export function Reveal({
   return (
     <motion.div
       className={className}
+      style={{ width: "100%", maxWidth: "100%", minWidth: 0 }}
       initial={reduce ? false : { opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
+      viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}

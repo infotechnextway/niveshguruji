@@ -6,12 +6,13 @@ const topics = ["Book a free check-in", "Question about plans", "Portfolio revie
 
 const fieldStyle: React.CSSProperties = {
   width: "100%",
+  maxWidth: "100%",
   padding: "0.8rem 1rem",
   borderRadius: 12,
   border: "1px solid var(--nv-line)",
   background: "var(--nv-ink)",
   color: "var(--nv-ivory)",
-  fontSize: "1rem",
+  fontSize: "16px", // avoid iOS zoom on focus
   fontFamily: "inherit",
 };
 
@@ -91,7 +92,7 @@ export function ContactForm() {
         {errors.message && <p style={{ color: "#e8a0a0", fontSize: "0.82rem", marginTop: 6 }}>{errors.message}</p>}
       </div>
 
-      <button onClick={submit} className="nv-btn nv-btn-gold" type="button" style={{ justifyContent: "center" }}>
+      <button onClick={submit} className="nv-btn nv-btn-gold" type="button" style={{ justifyContent: "center", width: "100%" }}>
         Send message {"→"}
       </button>
     </div>

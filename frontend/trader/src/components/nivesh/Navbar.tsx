@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { nav, site } from "@/lib/nivesh/site";
 
@@ -10,48 +10,41 @@ export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 50,
-        backdropFilter: "blur(12px)",
-        background: "rgba(11,16,32,0.72)",
-        borderBottom: "1px solid var(--nv-line)",
-      }}
-    >
-      <div
-        className="nv-wrap"
-        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 72 }}
-      >
+    <header className="nv-header">
+      <div className="nv-wrap nv-header__bar">
         <Link
           href="/"
           onClick={() => setOpen(false)}
-          style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", color: "var(--nv-ivory)" }}
+          className="nv-header__brand"
         >
-          <span aria-hidden style={{ color: "var(--nv-gold)", fontSize: 20 }}>
+          <span aria-hidden className="nv-header__star">
             {"✦"}
           </span>
-          <span className="nv-display" style={{ fontSize: 22, fontWeight: 600 }}>
-            {site.name}
-          </span>
+          <span className="nv-display nv-brand-text">{site.name}</span>
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="nv-desktop-nav" style={{ display: "flex", alignItems: "center", gap: 28 }}>
+        <nav className="nv-desktop-nav">
           {nav.slice(1).map((item) => {
             const active = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                style={{
-                  color: active ? "var(--nv-gold)" : "var(--nv-muted)",
-                  textDecoration: "none",
-                  fontSize: 15,
-                  fontWeight: 500,
-                }}
+                className={active ? "nv-nav-link is-active" : "nv-nav-link"}
               >
                 {item.label}
               </Link>
@@ -59,49 +52,34 @@ export function Navbar() {
           })}
           <Link
             href="/login"
-            style={{
-              color: pathname === "/login" ? "var(--nv-gold)" : "var(--nv-muted)",
-              textDecoration: "none",
-              fontSize: 15,
-              fontWeight: 500,
-            }}
+            className={pathname === "/login" ? "nv-nav-link is-active" : "nv-nav-link"}
           >
             Login
           </Link>
-          <Link href="/register" className="nv-btn nv-btn-gold" style={{ padding: "0.6rem 1.2rem" }}>
+          <Link href="/register" className="nv-btn nv-btn-gold nv-header__cta">
             Start free
           </Link>
         </nav>
 
-        {/* Mobile toggle */}
         <button
           className="nv-mobile-toggle"
+          type="button"
+          aria-expanded={open}
           aria-label={open ? "Close menu" : "Open menu"}
           onClick={() => setOpen((v) => !v)}
-          style={{ display: "none", background: "none", border: "none", color: "var(--nv-ivory)", cursor: "pointer" }}
         >
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
-      {/* Mobile menu */}
       {open && (
-        <nav
-          className="nv-wrap"
-          style={{ display: "flex", flexDirection: "column", gap: 4, paddingBottom: 20 }}
-        >
+        <nav className="nv-wrap nv-mobile-menu" aria-label="Mobile">
           {nav.slice(1).map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
-              style={{
-                color: pathname === item.href ? "var(--nv-gold)" : "var(--nv-ivory)",
-                textDecoration: "none",
-                padding: "12px 0",
-                borderBottom: "1px solid var(--nv-line)",
-                fontSize: 17,
-              }}
+              className={pathname === item.href ? "nv-mobile-link is-active" : "nv-mobile-link"}
             >
               {item.label}
             </Link>
@@ -109,21 +87,14 @@ export function Navbar() {
           <Link
             href="/login"
             onClick={() => setOpen(false)}
-            style={{
-              color: pathname === "/login" ? "var(--nv-gold)" : "var(--nv-ivory)",
-              textDecoration: "none",
-              padding: "12px 0",
-              borderBottom: "1px solid var(--nv-line)",
-              fontSize: 17,
-            }}
+            className={pathname === "/login" ? "nv-mobile-link is-active" : "nv-mobile-link"}
           >
             Login
           </Link>
           <Link
             href="/register"
             onClick={() => setOpen(false)}
-            className="nv-btn nv-btn-gold"
-            style={{ marginTop: 16, justifyContent: "center" }}
+            className="nv-btn nv-btn-gold nv-mobile-cta"
           >
             Start free
           </Link>
@@ -131,9 +102,89 @@ export function Navbar() {
       )}
 
       <style>{`
+        .nv-header {
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          background: rgba(11,16,32,0.86);
+          border-bottom: 1px solid var(--nv-line);
+        }
+        .nv-header__bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          min-height: 64px;
+          height: 64px;
+        }
+        .nv-header__brand {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+          text-decoration: none;
+          color: var(--nv-ivory);
+          flex: 1;
+        }
+        .nv-header__star {
+          color: var(--nv-gold);
+          font-size: 18px;
+          flex-shrink: 0;
+        }
+        .nv-desktop-nav {
+          display: flex;
+          align-items: center;
+          gap: 22px;
+          flex-shrink: 0;
+        }
+        .nv-nav-link {
+          color: var(--nv-muted);
+          text-decoration: none;
+          font-size: 15px;
+          font-weight: 500;
+          white-space: nowrap;
+        }
+        .nv-nav-link.is-active { color: var(--nv-gold); }
+        .nv-header__cta { padding: 0.55rem 1.1rem; }
+        .nv-mobile-toggle {
+          display: none;
+          background: none;
+          border: none;
+          color: var(--nv-ivory);
+          cursor: pointer;
+          padding: 8px;
+          margin-right: -8px;
+          flex-shrink: 0;
+        }
+        .nv-mobile-menu {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          padding-bottom: 20px;
+          max-height: min(80vh, 520px);
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        .nv-mobile-link {
+          color: var(--nv-ivory);
+          text-decoration: none;
+          padding: 14px 0;
+          border-bottom: 1px solid var(--nv-line);
+          font-size: 16px;
+        }
+        .nv-mobile-link.is-active { color: var(--nv-gold); }
+        .nv-mobile-cta {
+          margin-top: 16px;
+          width: 100%;
+        }
         @media (max-width: 820px) {
           .nv-desktop-nav { display: none !important; }
-          .nv-mobile-toggle { display: block !important; }
+          .nv-mobile-toggle { display: grid !important; place-items: center; }
+        }
+        @media (min-width: 821px) {
+          .nv-header__bar { height: 72px; min-height: 72px; }
         }
       `}</style>
     </header>

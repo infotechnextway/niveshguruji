@@ -24,13 +24,13 @@ export function SectionHeading({
       }}
     >
       <Eyebrow>{eyebrow}</Eyebrow>
-      <h2 style={{ fontSize: "clamp(2rem, 4.5vw, 3.1rem)", marginTop: "1rem" }}>
+      <h2 style={{ fontSize: "clamp(1.7rem, 4.5vw, 3.1rem)", marginTop: "1rem" }}>
         {title}
       </h2>
       {intro && (
         <p
           className="nv-muted"
-          style={{ marginTop: "1.1rem", fontSize: "1.1rem", lineHeight: 1.6 }}
+          style={{ marginTop: "1.1rem", fontSize: "clamp(1rem, 2.6vw, 1.1rem)", lineHeight: 1.6 }}
         >
           {intro}
         </p>

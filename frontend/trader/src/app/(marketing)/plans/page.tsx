@@ -15,13 +15,13 @@ export default function PlansPage() {
     <>
       <section style={{ position: "relative", overflow: "hidden" }}>
         <div className="nv-stars" />
-        <div className="nv-wrap" style={{ position: "relative", padding: "5rem 1.5rem 2rem", textAlign: "center" }}>
+        <div className="nv-wrap" style={{ position: "relative", padding: "clamp(3rem, 8vw, 5rem) 0 2rem", textAlign: "center" }}>
           <Reveal>
             <Eyebrow>Plans</Eyebrow>
-            <h1 style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)", margin: "1.2rem auto 0", maxWidth: 720 }}>
+            <h1 style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)", margin: "1.2rem auto 0", maxWidth: 720 }}>
               Pay for guidance, never for products.
             </h1>
-            <p className="nv-muted" style={{ margin: "1.4rem auto 0", maxWidth: 560, fontSize: "1.15rem" }}>
+            <p className="nv-muted" style={{ margin: "1.4rem auto 0", maxWidth: 560, fontSize: "clamp(1rem, 2.8vw, 1.15rem)" }}>
               The learning is free forever. The paid plans simply add a human guide and a plan shaped
               around your life. Cancel any month.
             </p>
@@ -40,13 +40,14 @@ export default function PlansPage() {
                 <div
                   className="nv-card"
                   style={{
-                    padding: "2.2rem",
+                    padding: "clamp(1.35rem, 4vw, 2.2rem)",
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",
                     borderColor: p.featured ? "var(--nv-gold)" : undefined,
                     boxShadow: p.featured ? "var(--nv-glow)" : undefined,
                     position: "relative",
+                    marginTop: p.featured ? 12 : 0,
                   }}
                 >
                   {p.featured && (
@@ -55,7 +56,9 @@ export default function PlansPage() {
                       style={{
                         position: "absolute",
                         top: -12,
-                        left: "2.2rem",
+                        left: "max(1rem, 1.2rem)",
+                        right: "auto",
+                        maxWidth: "calc(100% - 2rem)",
                         background: "var(--nv-gold)",
                         color: "#2a1e05",
                         padding: "4px 12px",
@@ -66,9 +69,9 @@ export default function PlansPage() {
                       Most chosen
                     </span>
                   )}
-                  <h2 style={{ fontSize: "1.6rem" }}>{p.name}</h2>
-                  <div style={{ marginTop: "1rem", display: "flex", alignItems: "baseline", gap: 8 }}>
-                    <span className="nv-mono nv-grad" style={{ fontSize: "2.6rem", fontWeight: 600 }}>
+                  <h2 style={{ fontSize: "clamp(1.35rem, 4vw, 1.6rem)" }}>{p.name}</h2>
+                  <div style={{ marginTop: "1rem", display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+                    <span className="nv-mono nv-grad" style={{ fontSize: "clamp(2rem, 7vw, 2.6rem)", fontWeight: 600 }}>
                       {p.price}
                     </span>
                     <span className="nv-muted" style={{ fontSize: "0.95rem" }}>{p.cadence}</span>
@@ -79,7 +82,7 @@ export default function PlansPage() {
                     {p.features.map((f) => (
                       <li key={f} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                         <Check size={18} style={{ color: "var(--nv-teal)", flexShrink: 0, marginTop: 2 }} />
-                        <span style={{ fontSize: "0.98rem", lineHeight: 1.45 }}>{f}</span>
+                        <span style={{ fontSize: "0.98rem", lineHeight: 1.45, minWidth: 0 }}>{f}</span>
                       </li>
                     ))}
                   </ul>
@@ -87,7 +90,7 @@ export default function PlansPage() {
                   <Link
                     href="/register"
                     className={`nv-btn ${p.featured ? "nv-btn-gold" : "nv-btn-ghost"}`}
-                    style={{ justifyContent: "center" }}
+                    style={{ justifyContent: "center", width: "100%" }}
                   >
                     {p.cta}
                   </Link>
@@ -108,10 +111,6 @@ export default function PlansPage() {
           />
         </div>
       </section>
-
-      <style>{`
-        @media (max-width: 900px) { .nv-plans-grid { grid-template-columns: 1fr !important; max-width: 460px; margin: 0 auto; } }
-      `}</style>
     </>
   );
 }

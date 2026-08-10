@@ -120,19 +120,30 @@ function AdminLoginForm() {
           display: grid;
           place-items: center;
           background: var(--bg);
-          padding: 24px;
+          padding: 16px;
           position: relative;
+          overflow-x: hidden;
+          width: 100%;
         }
-        .alp-tt { position: absolute; top: 24px; right: 24px; }
+        .alp-tt { position: absolute; top: 16px; right: 16px; z-index: 2; }
         .alp-card {
           width: 100%;
           max-width: 400px;
-          padding: 32px;
+          padding: 24px;
           display: flex;
           flex-direction: column;
           gap: 16px;
+          min-width: 0;
         }
-        .alp-brand { display: flex; align-items: center; gap: 12px; padding-bottom: 8px; }
+        .alp-brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding-bottom: 8px;
+          flex-wrap: wrap;
+          max-width: 100%;
+          overflow: hidden;
+        }
         .brand-mark {
           width: 32px; height: 32px; border-radius: 8px;
           background: linear-gradient(135deg, var(--accent), var(--accent-hover));
@@ -162,6 +173,11 @@ function AdminLoginForm() {
           color: var(--loss);
           border-radius: var(--r);
           font-size: 12px;
+        }
+        @media (max-width: 420px) {
+          .alp { padding: 12px; align-items: start; padding-top: 56px; }
+          .alp-card { padding: 20px 16px; }
+          .alp-title { font-size: 20px; }
         }
       `}</style>
     </div>

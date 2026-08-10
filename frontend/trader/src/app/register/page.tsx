@@ -131,15 +131,21 @@ export default function RegisterPage() {
         )}
       </div>
       <style jsx>{`
-        .rp { min-height: 100vh; display: grid; place-items: center; background: var(--bg); padding: 24px; position: relative; }
-        .rp-tt { position: absolute; top: 24px; right: 24px; }
-        .rp-card { width: 100%; max-width: 520px; padding: 32px; display: flex; flex-direction: column; gap: 16px; }
-        .rp-brand { display: flex; align-items: center; padding-bottom: 8px; }
+        .rp { min-height: 100vh; display: grid; place-items: center; background: var(--bg); padding: 16px; position: relative; overflow-x: hidden; width: 100%; }
+        .rp-tt { position: absolute; top: 16px; right: 16px; z-index: 2; }
+        .rp-card { width: 100%; max-width: 520px; padding: 24px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+        .rp-brand { display: flex; align-items: center; padding-bottom: 8px; max-width: 100%; overflow: hidden; }
         .rp-title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
         .lbl { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
         .err { padding: 8px 12px; background: var(--loss-soft); color: var(--loss); border-radius: var(--r); font-size: 12px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        @media (max-width: 560px) { .grid-2 { grid-template-columns: 1fr; } }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; min-width: 0; }
+        .grid-2 > * { min-width: 0; }
+        @media (max-width: 560px) {
+          .grid-2 { grid-template-columns: 1fr; }
+          .rp { padding: 12px; align-items: start; padding-top: 56px; }
+          .rp-card { padding: 20px 16px; }
+          .rp-title { font-size: 20px; }
+        }
       `}</style>
     </div>
   );

@@ -20,7 +20,7 @@ export function NewsletterForm() {
 
   if (done) {
     return (
-      <p className="nv-display" style={{ fontSize: "1.3rem", color: "var(--nv-ink)" }}>
+      <p className="nv-display" style={{ fontSize: "clamp(1.1rem, 4vw, 1.3rem)", color: "var(--nv-ink)" }}>
         You’re in {"✦"} Look for the first note this Sunday.
       </p>
     );
@@ -28,7 +28,7 @@ export function NewsletterForm() {
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+      <div className="nv-newsletter-row" style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
         <input
           type="email"
           value={email}
@@ -37,13 +37,16 @@ export function NewsletterForm() {
           placeholder="you@email.com"
           aria-label="Email address"
           style={{
-            flex: "1 1 260px",
+            flex: "1 1 220px",
+            minWidth: 0,
+            width: "100%",
+            maxWidth: "100%",
             padding: "0.85rem 1.1rem",
             borderRadius: 999,
             border: "1px solid var(--nv-line-2)",
             background: "#fff",
             color: "var(--nv-ink)",
-            fontSize: "1rem",
+            fontSize: "16px",
           }}
         />
         <button onClick={submit} className="nv-btn nv-btn-gold" type="button">

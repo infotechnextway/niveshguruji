@@ -15,13 +15,13 @@ export default function HowItWorksPage() {
       {/* Hero */}
       <section style={{ position: "relative", overflow: "hidden" }}>
         <div className="nv-stars" />
-        <div className="nv-wrap" style={{ position: "relative", padding: "5rem 1.5rem 3rem", maxWidth: 820 }}>
+        <div className="nv-wrap" style={{ position: "relative", padding: "clamp(3rem, 8vw, 5rem) 0 3rem", maxWidth: 820 }}>
           <Reveal>
             <Eyebrow>How it works</Eyebrow>
-            <h1 style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)", marginTop: "1.2rem" }}>
+            <h1 style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)", marginTop: "1.2rem" }}>
               From confused to confident, one calm step at a time.
             </h1>
-            <p className="nv-muted" style={{ marginTop: "1.4rem", fontSize: "1.15rem", lineHeight: 1.6 }}>
+            <p className="nv-muted" style={{ marginTop: "1.4rem", fontSize: "clamp(1rem, 2.8vw, 1.15rem)", lineHeight: 1.6 }}>
               There’s no dashboard to master and no account to link before you’re ready. The whole
               method is four steps you can move through as slowly as you like.
             </p>
@@ -40,19 +40,19 @@ export default function HowItWorksPage() {
                   display: "grid",
                   gridTemplateColumns: "120px 1fr",
                   gap: 32,
-                  padding: "2.5rem 0",
+                  padding: "clamp(1.5rem, 4vw, 2.5rem) 0",
                   borderTop: i === 0 ? "none" : "1px solid var(--nv-line)",
                 }}
               >
                 <div
                   className="nv-mono nv-grad"
-                  style={{ fontSize: "3rem", fontWeight: 600, lineHeight: 1 }}
+                  style={{ fontSize: "clamp(2.2rem, 8vw, 3rem)", fontWeight: 600, lineHeight: 1 }}
                 >
                   {s.n}
                 </div>
-                <div>
-                  <h2 style={{ fontSize: "1.7rem" }}>{s.title}</h2>
-                  <p className="nv-muted" style={{ marginTop: "0.8rem", fontSize: "1.08rem", lineHeight: 1.65 }}>
+                <div style={{ minWidth: 0 }}>
+                  <h2 style={{ fontSize: "clamp(1.35rem, 4vw, 1.7rem)" }}>{s.title}</h2>
+                  <p className="nv-muted" style={{ marginTop: "0.8rem", fontSize: "clamp(0.98rem, 2.6vw, 1.08rem)", lineHeight: 1.65 }}>
                     {s.body}
                   </p>
                 </div>
@@ -74,12 +74,17 @@ export default function HowItWorksPage() {
                     background: "#fff",
                     borderRadius: "var(--nv-radius)",
                     border: "1px solid var(--nv-line-2)",
-                    padding: "1.4rem 1.6rem",
+                    padding: "clamp(1rem, 3.5vw, 1.4rem) clamp(1rem, 3.5vw, 1.6rem)",
                   }}
                 >
                   <summary
                     className="nv-display"
-                    style={{ cursor: "pointer", fontSize: "1.2rem", color: "var(--nv-ink)", listStyle: "none" }}
+                    style={{
+                      cursor: "pointer",
+                      fontSize: "clamp(1.05rem, 3.5vw, 1.2rem)",
+                      color: "var(--nv-ink)",
+                      listStyle: "none",
+                    }}
                   >
                     {f.q}
                   </summary>
@@ -94,22 +99,16 @@ export default function HowItWorksPage() {
       {/* CTA */}
       <section className="nv-section" style={{ textAlign: "center" }}>
         <div className="nv-wrap">
-          <h2 style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)", maxWidth: 640, margin: "0 auto" }}>
+          <h2 style={{ fontSize: "clamp(1.7rem, 4.5vw, 3rem)", maxWidth: 640, margin: "0 auto" }}>
             Ready for step one?
           </h2>
-          <div style={{ marginTop: "2rem" }}>
+          <div className="nv-cta-row" style={{ marginTop: "2rem", justifyContent: "center" }}>
             <Link href="/contact" className="nv-btn nv-btn-gold">
               Book your free check-in {"→"}
             </Link>
           </div>
         </div>
       </section>
-
-      <style>{`
-        @media (max-width: 640px) {
-          .nv-step-row { grid-template-columns: 1fr !important; gap: 8px !important; }
-        }
-      `}</style>
     </>
   );
 }

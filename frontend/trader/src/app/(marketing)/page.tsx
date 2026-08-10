@@ -7,7 +7,6 @@ import { stats, values, topics, steps, testimonials } from "@/lib/nivesh/site";
 export default function HomePage() {
   return (
     <>
-      {/* ---------- HERO ---------- */}
       <section style={{ position: "relative", overflow: "hidden" }}>
         <div className="nv-stars" />
         <div
@@ -19,29 +18,30 @@ export default function HomePage() {
             gap: 40,
             alignItems: "center",
             minHeight: "min(88vh, 760px)",
-            padding: "3rem 1.5rem",
+            paddingTop: "3rem",
+            paddingBottom: "3rem",
           }}
         >
-          <div>
+          <div style={{ minWidth: 0 }}>
             <Reveal>
               <Eyebrow>Investing, simplified</Eyebrow>
             </Reveal>
             <Reveal delay={0.05}>
-              <h1 style={{ fontSize: "clamp(2.6rem, 6vw, 4.6rem)", marginTop: "1.2rem" }}>
+              <h1 style={{ fontSize: "clamp(2.1rem, 6vw, 4.6rem)", marginTop: "1.2rem" }}>
                 Grow your money with a guide who <span className="nv-grad">actually explains things</span>.
               </h1>
             </Reveal>
             <Reveal delay={0.12}>
               <p
                 className="nv-muted"
-                style={{ marginTop: "1.6rem", fontSize: "1.2rem", lineHeight: 1.6, maxWidth: 520 }}
+                style={{ marginTop: "1.6rem", fontSize: "clamp(1rem, 2.8vw, 1.2rem)", lineHeight: 1.6, maxWidth: 520 }}
               >
                 No jargon, no commissions, no pressure. Just plain lessons and a personal plan that
                 turn “I should start investing” into money quietly growing every month.
               </p>
             </Reveal>
             <Reveal delay={0.2}>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: "2.2rem" }}>
+              <div className="nv-cta-row" style={{ marginTop: "2.2rem" }}>
                 <Link href="/register" className="nv-btn nv-btn-gold">
                   Start free {"→"}
                 </Link>
@@ -60,14 +60,12 @@ export default function HomePage() {
             </Reveal>
           </div>
 
-          {/* 3D signature */}
-          <div className="nv-hero-orb" style={{ height: "min(70vh, 560px)", minHeight: 380 }}>
+          <div className="nv-hero-orb nv-orb-frame" style={{ height: "min(70vh, 560px)", minHeight: 280 }}>
             <OrbCanvas />
           </div>
         </div>
       </section>
 
-      {/* ---------- STATS ---------- */}
       <section style={{ borderTop: "1px solid var(--nv-line)", borderBottom: "1px solid var(--nv-line)" }}>
         <div
           className="nv-wrap nv-stats-grid"
@@ -75,7 +73,8 @@ export default function HomePage() {
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
             gap: 32,
-            padding: "3rem 1.5rem",
+            paddingTop: "3rem",
+            paddingBottom: "3rem",
           }}
         >
           {stats.map((s, i) => (
@@ -86,7 +85,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- VALUES ---------- */}
       <section className="nv-section">
         <div className="nv-wrap">
           <SectionHeading
@@ -105,7 +103,7 @@ export default function HomePage() {
           >
             {values.map((v, i) => (
               <Reveal key={v.title} delay={i * 0.08}>
-                <div className="nv-card" style={{ padding: "2rem", height: "100%" }}>
+                <div className="nv-card" style={{ padding: "clamp(1.25rem, 4vw, 2rem)", height: "100%" }}>
                   <span aria-hidden style={{ color: "var(--nv-gold)", fontSize: 22 }}>{"✦"}</span>
                   <h3 style={{ fontSize: "1.4rem", marginTop: "1rem" }}>{v.title}</h3>
                   <p className="nv-muted" style={{ marginTop: "0.8rem", lineHeight: 1.6 }}>{v.body}</p>
@@ -116,7 +114,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- TOPICS ---------- */}
       <section className="nv-light nv-section">
         <div className="nv-wrap">
           <SectionHeading
@@ -137,7 +134,7 @@ export default function HomePage() {
               <Reveal key={t.title} delay={i * 0.05}>
                 <div
                   style={{
-                    padding: "1.6rem",
+                    padding: "clamp(1.15rem, 3.5vw, 1.6rem)",
                     borderRadius: "var(--nv-radius)",
                     border: "1px solid var(--nv-line-2)",
                     background: "#fff",
@@ -156,7 +153,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- STEPS PREVIEW ---------- */}
       <section className="nv-section">
         <div className="nv-wrap">
           <SectionHeading eyebrow="How it works" title="Four steps, at your pace" />
@@ -189,7 +185,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- TESTIMONIALS ---------- */}
       <section className="nv-light nv-section">
         <div className="nv-wrap">
           <SectionHeading eyebrow="In their words" title="Started nervous. Stayed for the clarity." />
@@ -207,7 +202,7 @@ export default function HomePage() {
                 <figure
                   style={{
                     margin: 0,
-                    padding: "2rem",
+                    padding: "clamp(1.25rem, 4vw, 2rem)",
                     borderRadius: "var(--nv-radius)",
                     background: "#fff",
                     border: "1px solid var(--nv-line-2)",
@@ -216,7 +211,7 @@ export default function HomePage() {
                 >
                   <blockquote
                     className="nv-display"
-                    style={{ margin: 0, fontSize: "1.4rem", lineHeight: 1.4, color: "var(--nv-ink)" }}
+                    style={{ margin: 0, fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", lineHeight: 1.4, color: "var(--nv-ink)" }}
                   >
                     {"“"}{t.quote}{"”"}
                   </blockquote>
@@ -230,19 +225,18 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ---------- CTA BAND ---------- */}
       <section style={{ position: "relative", overflow: "hidden" }}>
         <div className="nv-stars" />
-        <div className="nv-wrap" style={{ position: "relative", padding: "6rem 1.5rem", textAlign: "center" }}>
+        <div className="nv-wrap" style={{ position: "relative", padding: "clamp(3.5rem, 8vw, 6rem) 0", textAlign: "center" }}>
           <Reveal>
             <Eyebrow>Your first step</Eyebrow>
-            <h2 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", margin: "1.2rem auto 0", maxWidth: 760 }}>
+            <h2 style={{ fontSize: "clamp(1.8rem, 5vw, 3.6rem)", margin: "1.2rem auto 0", maxWidth: 760 }}>
               The best day to start was years ago. The second best is <span className="nv-grad">today</span>.
             </h2>
-            <p className="nv-muted" style={{ margin: "1.4rem auto 0", maxWidth: 520, fontSize: "1.1rem" }}>
+            <p className="nv-muted" style={{ margin: "1.4rem auto 0", maxWidth: 520, fontSize: "clamp(1rem, 2.8vw, 1.1rem)" }}>
               Begin with the free lessons. Upgrade only when you want a guide walking beside you.
             </p>
-            <div style={{ marginTop: "2.4rem" }}>
+            <div className="nv-cta-row" style={{ marginTop: "2.4rem", justifyContent: "center" }}>
               <Link href="/register" className="nv-btn nv-btn-gold">
                 Start free today {"→"}
               </Link>
@@ -250,20 +244,6 @@ export default function HomePage() {
           </Reveal>
         </div>
       </section>
-
-      {/* Responsive rules */}
-      <style>{`
-        @media (max-width: 900px) {
-          .nv-hero-grid { grid-template-columns: 1fr !important; }
-          .nv-hero-orb { order: -1; height: 320px !important; }
-          .nv-stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .nv-cards-3, .nv-cards-4 { grid-template-columns: 1fr 1fr !important; }
-          .nv-cards-2 { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width: 560px) {
-          .nv-cards-3, .nv-cards-4, .nv-stats-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </>
   );
 }
