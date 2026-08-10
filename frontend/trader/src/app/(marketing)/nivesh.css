@@ -1,0 +1,130 @@
+/*
+  Nivesh Guruji theme tokens.
+  Scoped under .nv-root so it can live inside your existing app
+  without leaking styles into the rest of your site.
+*/
+
+.nv-root {
+  /* Core palette */
+  --nv-ink: #0b1020;         /* deep indigo-black base */
+  --nv-ink-2: #111830;       /* elevated surface */
+  --nv-ink-3: #1a2340;       /* hover / border surface */
+  --nv-ivory: #f5f2ea;       /* warm paper (text on dark) */
+  --nv-ivory-2: #fbf9f4;     /* light section background */
+  --nv-muted: #a3abc9;       /* secondary text on dark */
+  --nv-muted-2: #5a627f;     /* secondary text on light */
+
+  /* Accents */
+  --nv-gold: #ecb23e;        /* the "guru" signature */
+  --nv-gold-soft: #f6d38a;
+  --nv-teal: #35c6a5;        /* growth */
+  --nv-indigo: #7c86f2;      /* gradient partner */
+
+  /* Effects */
+  --nv-line: rgba(245, 242, 234, 0.10);
+  --nv-line-2: rgba(11, 16, 32, 0.10);
+  --nv-glow: 0 0 80px -20px rgba(236, 178, 62, 0.55);
+  --nv-radius: 18px;
+
+  color: var(--nv-ivory);
+  background: var(--nv-ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Typography roles */
+.nv-root h1, .nv-root h2, .nv-root h3, .nv-root .nv-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.02;
+}
+.nv-mono { font-family: var(--font-mono), ui-monospace, monospace; }
+
+/* The recurring guiding-star eyebrow */
+.nv-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--nv-gold);
+}
+.nv-eyebrow::before { content: "\2726"; font-size: 0.9em; }
+
+/* Gradient text used sparingly on the hero */
+.nv-grad {
+  background: linear-gradient(105deg, var(--nv-gold) 0%, var(--nv-gold-soft) 40%, var(--nv-teal) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Buttons */
+.nv-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 1.5rem; border-radius: 999px;
+  font-weight: 600; font-size: 0.95rem;
+  transition: transform 0.18s ease, box-shadow 0.25s ease, background 0.2s ease;
+  cursor: pointer; text-decoration: none; border: 1px solid transparent;
+}
+.nv-btn:hover { transform: translateY(-2px); }
+.nv-btn-gold { background: var(--nv-gold); color: #2a1e05; box-shadow: var(--nv-glow); }
+.nv-btn-gold:hover { background: var(--nv-gold-soft); }
+.nv-btn-ghost { background: transparent; color: var(--nv-ivory); border-color: var(--nv-line); }
+.nv-btn-ghost:hover { border-color: var(--nv-gold); color: var(--nv-gold); }
+
+/* Cards & surfaces */
+.nv-card {
+  background: linear-gradient(180deg, var(--nv-ink-2), var(--nv-ink));
+  border: 1px solid var(--nv-line);
+  border-radius: var(--nv-radius);
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+.nv-card:hover { border-color: rgba(236, 178, 62, 0.4); transform: translateY(-4px); }
+
+.nv-hairline { border: none; border-top: 1px solid var(--nv-line); }
+
+/* Light section inversion */
+.nv-light {
+  background: var(--nv-ivory-2);
+  color: var(--nv-ink);
+}
+.nv-light .nv-eyebrow { color: #a9781a; }
+.nv-light .nv-muted { color: var(--nv-muted-2); }
+.nv-muted { color: var(--nv-muted); }
+
+/* Layout helpers */
+.nv-wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+.nv-section { padding: clamp(4rem, 9vw, 8rem) 0; }
+
+/* Focus visibility (accessibility floor) */
+.nv-root a:focus-visible,
+.nv-root button:focus-visible {
+  outline: 2px solid var(--nv-gold);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Ambient starfield dots for dark sections */
+.nv-stars {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, rgba(245,242,234,0.5), transparent),
+    radial-gradient(1.5px 1.5px at 70% 60%, rgba(245,242,234,0.35), transparent),
+    radial-gradient(1px 1px at 40% 80%, rgba(236,178,62,0.5), transparent),
+    radial-gradient(1px 1px at 85% 25%, rgba(245,242,234,0.4), transparent),
+    radial-gradient(1.5px 1.5px at 55% 15%, rgba(53,198,165,0.4), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nv-root *, .nv-root *::before, .nv-root *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
