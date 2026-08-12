@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Smaller self-contained build for cPanel / VPS Node hosting.
+  output: 'standalone',
   async redirects() {
     return [
       { source: '/plans', destination: '/challenges', permanent: false },
