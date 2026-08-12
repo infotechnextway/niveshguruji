@@ -1,0 +1,166 @@
+/*
+  Nivesh Guruji — funded-trader theme.
+  Scoped under .ng-root so it can drop into an existing app without leaking.
+*/
+
+.ng-root {
+  --ng-bg: #070a16;          /* near-black indigo */
+  --ng-bg-2: #0d1224;        /* panel */
+  --ng-bg-3: #151c35;        /* raised / border */
+  --ng-ivory: #f3f5fb;
+  --ng-muted: #9aa3c4;
+  --ng-muted-2: #626b8f;
+
+  --ng-gold: #f0b429;        /* brand / money */
+  --ng-gold-soft: #ffd77a;
+  --ng-teal: #2fd6a5;        /* profit / up */
+  --ng-red: #ff5d6c;         /* loss / down */
+  --ng-indigo: #6c7bff;      /* accent gradient partner */
+
+  --ng-line: rgba(243, 245, 251, 0.09);
+  --ng-glow: 0 0 90px -20px rgba(240, 180, 41, 0.6);
+  --ng-radius: 16px;
+  --ng-gutter: clamp(1rem, 4.5vw, 1.5rem);
+
+  color: var(--ng-ivory);
+  background: var(--ng-bg);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  position: relative;
+}
+
+.ng-root *,
+.ng-root *::before,
+.ng-root *::after {
+  box-sizing: border-box;
+}
+
+.ng-root img,
+.ng-root canvas,
+.ng-root svg,
+.ng-root video {
+  max-width: 100%;
+  height: auto;
+}
+
+.ng-root h1, .ng-root h2, .ng-root h3, .ng-root .ng-display {
+  font-family: var(--font-grotesk), var(--font-inter), sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+.ng-mono { font-family: var(--font-mono), ui-monospace, monospace; }
+
+.ng-root p,
+.ng-root li,
+.ng-root span,
+.ng-root a {
+  overflow-wrap: anywhere;
+}
+
+.ng-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--ng-gold);
+}
+.ng-eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--ng-gold); }
+
+.ng-grad {
+  background: linear-gradient(100deg, var(--ng-gold) 0%, var(--ng-gold-soft) 45%, var(--ng-teal) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Buttons */
+.ng-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.9rem 1.6rem; border-radius: 12px;
+  font-weight: 600; font-size: 0.95rem; cursor: pointer;
+  text-decoration: none; border: 1px solid transparent;
+  transition: transform 0.16s ease, box-shadow 0.25s ease, background 0.2s ease, border-color 0.2s ease;
+}
+.ng-btn:hover { transform: translateY(-2px); }
+.ng-btn-gold { background: var(--ng-gold); color: #241a02; box-shadow: var(--ng-glow); }
+.ng-btn-gold:hover { background: var(--ng-gold-soft); }
+.ng-btn-ghost { background: rgba(255,255,255,0.02); color: var(--ng-ivory); border-color: var(--ng-line); }
+.ng-btn-ghost:hover { border-color: var(--ng-gold); color: var(--ng-gold); }
+
+/* Surfaces */
+.ng-card {
+  background: linear-gradient(180deg, var(--ng-bg-2), var(--ng-bg));
+  border: 1px solid var(--ng-line);
+  border-radius: var(--ng-radius);
+}
+.ng-panel { background: var(--ng-bg-2); border: 1px solid var(--ng-line); border-radius: var(--ng-radius); }
+
+.ng-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--ng-line); background: rgba(255,255,255,0.02);
+  font-size: 0.8rem; color: var(--ng-muted);
+}
+
+.ng-up { color: var(--ng-teal); }
+.ng-down { color: var(--ng-red); }
+.ng-muted { color: var(--ng-muted); }
+
+.ng-wrap {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: var(--ng-gutter);
+  padding-right: var(--ng-gutter);
+  min-width: 0;
+}
+.ng-section { padding: clamp(3.5rem, 8vw, 7rem) 0; }
+.ng-hairline { border: none; border-top: 1px solid var(--ng-line); }
+
+.ng-btn {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  justify-content: center;
+}
+.ng-card,
+.ng-panel {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Glow backdrop for hero / CTA */
+.ng-aura {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+  background:
+    radial-gradient(600px 320px at 80% 10%, rgba(240,180,41,0.14), transparent 60%),
+    radial-gradient(560px 320px at 15% 30%, rgba(108,123,255,0.16), transparent 60%),
+    radial-gradient(500px 300px at 50% 100%, rgba(47,214,165,0.10), transparent 60%);
+}
+
+.ng-root a:focus-visible, .ng-root button:focus-visible {
+  outline: 2px solid var(--ng-gold); outline-offset: 3px; border-radius: 8px;
+}
+
+@keyframes ng-scroll-x { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ng-marquee { display: flex; width: max-content; animation: ng-scroll-x 32s linear infinite; }
+.ng-marquee-fast { animation-duration: 22s; }
+.ng-marquee:hover { animation-play-state: paused; }
+
+@media (max-width: 640px) {
+  .ng-section { padding: 2.75rem 0; }
+  .ng-root h1 { font-size: clamp(1.85rem, 8vw, 2.6rem) !important; }
+  .ng-root h2 { font-size: clamp(1.45rem, 6.5vw, 2.1rem) !important; }
+  .ng-btn:hover { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ng-root *, .ng-root *::before, .ng-root *::after {
+    animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
