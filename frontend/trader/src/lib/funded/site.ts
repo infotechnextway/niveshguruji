@@ -34,8 +34,6 @@ export const ticker = [
   { pair: "NIFTY", price: "24,318.5", change: "+0.32%", up: true },
   { pair: "USD/INR", price: "86.74", change: "-0.08%", up: false },
   { pair: "BANKNIFTY", price: "51,204.9", change: "+0.44%", up: true },
-  { pair: "EUR/USD", price: "1.1416", change: "+0.03%", up: true },
-  { pair: "BTC/USD", price: "94,182", change: "-0.21%", up: false },
   { pair: "CRUDE", price: "6,140", change: "+0.66%", up: true },
 ];
 
