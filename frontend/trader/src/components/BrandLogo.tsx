@@ -68,13 +68,21 @@ export function BrandLockup({ useImage = true, className, height = 56 }: LockupP
         src="/brand/logo.png"
         alt="NiveshGuru — Investment Simplified"
         className={className}
-        style={{ display: 'block', height, width: 'auto', maxWidth: '100%' }}
+        style={{
+          display: 'block',
+          height,
+          width: 'auto',
+          maxWidth: '100%',
+          objectFit: 'contain',
+          objectPosition: 'left center',
+          background: 'transparent',
+        }}
       />
     );
   }
   return (
     <div className={`ng-lockup${className ? ` ${className}` : ''}`}>
-      <BrandMark size={36} />
+      <BrandMark size={Math.round(height * 0.64)} />
       <div className="ng-lockup__text">
         <BrandWordmark />
         <span className="ng-lockup__tag">Investment · Simplified</span>
