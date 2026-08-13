@@ -138,11 +138,17 @@ export function Navbar() {
             flex: 1;
           }
           .ng-header__logo {
-            height: 40px;
-            width: auto;
-            max-width: min(58vw, 220px);
-            object-fit: contain;
-            border-radius: 8px;
+            max-width: min(70vw, 260px);
+          }
+          .ng-header__logo.ng-lockup {
+            gap: 10px;
+          }
+          .ng-header__logo .ng-wordmark {
+            font-size: 15px;
+            letter-spacing: 0.04em;
+          }
+          .ng-header__logo .ng-lockup__tag {
+            font-size: 9px;
           }
           .ng-desktop-nav {
             display: flex;

@@ -58,6 +58,12 @@
 }
 .ng-mono { font-family: var(--font-mono), ui-monospace, monospace; }
 
+/* Brand lockup on dark funded chrome */
+.ng-root .ng-lockup { align-items: center; }
+.ng-root .ng-wordmark__nivesh { color: var(--ng-ivory); }
+.ng-root .ng-wordmark__guru { color: var(--ng-teal); }
+.ng-root .ng-lockup__tag { color: var(--ng-muted); }
+
 .ng-root p,
 .ng-root li,
 .ng-root span,

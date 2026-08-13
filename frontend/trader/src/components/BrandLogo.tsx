@@ -59,8 +59,11 @@ type LockupProps = {
   height?: number;
 };
 
-/** Full brand lockup for login / marketing. */
-export function BrandLockup({ useImage = true, className, height = 56 }: LockupProps) {
+/**
+ * Full brand lockup for login / marketing.
+ * Default is the composed mark + wordmark (avoids raster artifacts in logo.png).
+ */
+export function BrandLockup({ useImage = false, className, height = 56 }: LockupProps) {
   if (useImage) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -80,9 +83,15 @@ export function BrandLockup({ useImage = true, className, height = 56 }: LockupP
       />
     );
   }
+
+  const mark = Math.max(28, Math.round(height * 0.72));
   return (
-    <div className={`ng-lockup${className ? ` ${className}` : ''}`}>
-      <BrandMark size={Math.round(height * 0.64)} />
+    <div
+      className={`ng-lockup${className ? ` ${className}` : ''}`}
+      style={{ minHeight: height }}
+      aria-label="NiveshGuru — Investment Simplified"
+    >
+      <BrandMark size={mark} />
       <div className="ng-lockup__text">
         <BrandWordmark />
         <span className="ng-lockup__tag">Investment · Simplified</span>
