@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLockup } from "@/components/BrandLogo";
 import { nav, site } from "@/lib/funded/site";
 
 export function Footer() {
@@ -15,10 +16,9 @@ export function Footer() {
         }}
       >
         <div className="ng-foot-brand" style={{ maxWidth: 340, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-            <span aria-hidden style={{ color: "var(--ng-gold)", fontSize: 22, flexShrink: 0 }}>◆</span>
-            <span className="ng-display" style={{ fontSize: 20, fontWeight: 700 }}>{site.name}</span>
-          </div>
+          <Link href="/" aria-label={site.name} style={{ display: "inline-block", maxWidth: "100%" }}>
+            <BrandLockup height={48} />
+          </Link>
           <p className="ng-muted" style={{ marginTop: 14, lineHeight: 1.6 }}>
             {site.tagline} A funded-trader programme built for India — priced in INR, paid in INR. Based in {site.city}.
           </p>

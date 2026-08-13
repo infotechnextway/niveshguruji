@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { BrandLockup } from "@/components/BrandLogo";
 import { nav, site } from "@/lib/funded/site";
 
 export function Navbar() {
@@ -32,9 +33,8 @@ export function Navbar() {
 
       <header className="ng-header">
         <div className="ng-wrap ng-header__bar">
-          <Link href="/" onClick={() => setOpen(false)} className="ng-header__brand">
-            <span aria-hidden style={{ color: "var(--ng-gold)", fontSize: 22, flexShrink: 0 }}>◆</span>
-            <span className="ng-display ng-brand-text">{site.name}</span>
+          <Link href="/" onClick={() => setOpen(false)} className="ng-header__brand" aria-label={site.name}>
+            <BrandLockup height={40} className="ng-header__logo" />
           </Link>
 
           <nav className="ng-desktop-nav">
@@ -137,13 +137,12 @@ export function Navbar() {
             color: var(--ng-ivory);
             flex: 1;
           }
-          .ng-brand-text {
-            font-size: 20px;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+          .ng-header__logo {
+            height: 40px;
+            width: auto;
             max-width: min(58vw, 220px);
+            object-fit: contain;
+            border-radius: 8px;
           }
           .ng-desktop-nav {
             display: flex;
