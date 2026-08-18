@@ -12,7 +12,7 @@ function mockModels() {
   return [
     { findOne: () => leanNull() },
     { findOne: () => leanNull() },
-  ] as ConstructorParameters<typeof SimulatorFeed>;
+  ] as unknown as ConstructorParameters<typeof SimulatorFeed>;
 }
 
 describe('SimulatorFeed', () => {

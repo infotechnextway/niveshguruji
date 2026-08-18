@@ -7,9 +7,20 @@ import { Quote, quoteCacheKey, quoteChannel } from '@app/shared';
  * pipeline's core (cache write + fan-out + candle aggregation) to prove the
  * data path end to end without Mongo/Redis. This mirrors MarketDataService.handleTick.
  */
+function mockModels(): ConstructorParameters<typeof SimulatorFeed> {
+  const leanNull = () => ({
+    select: () => ({ lean: async () => null }),
+    sort: () => ({ select: () => ({ lean: async () => null }) }),
+  });
+  return [
+    { findOne: () => leanNull() },
+    { findOne: () => leanNull() },
+  ] as unknown as ConstructorParameters<typeof SimulatorFeed>;
+}
+
 describe('Market data pipeline (in-process smoke)', () => {
   it('caches last quote, fans out on the right channel, and aggregates candles', async () => {
-    const feed = new SimulatorFeed();
+    const feed = new SimulatorFeed(...mockModels());
     const cache = new Map<string, string>();
     const published: Array<{ channel: string; quote: Quote }> = [];
     const agg = new CandleAggregator();
