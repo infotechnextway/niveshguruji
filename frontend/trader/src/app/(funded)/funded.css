@@ -1,31 +1,45 @@
 /*
-  Nivesh Guruji — funded-trader theme.
+  Nivesh Guruji — funded-trader theme (light / broker-style).
   Scoped under .ng-root so it can drop into an existing app without leaking.
+  Inspired by zerodha.com / angelone.in: clean white canvas, dark ink,
+  generous whitespace, and a single gold accent.
 */
 
 .ng-root {
-  --ng-bg: #070a16;          /* near-black indigo */
-  --ng-bg-2: #0d1224;        /* panel */
-  --ng-bg-3: #151c35;        /* raised / border */
-  --ng-ivory: #f3f5fb;
-  --ng-muted: #9aa3c4;
-  --ng-muted-2: #626b8f;
+  /* Canvas */
+  --ng-bg: #ffffff;
+  --ng-bg-soft: #f7f8fa;      /* alternating section tint */
+  --ng-bg-2: #f2f4f8;         /* raised panels */
+  --ng-bg-3: #eceef4;
 
-  --ng-gold: #f0b429;        /* brand / money */
-  --ng-gold-soft: #ffd77a;
-  --ng-teal: #2fd6a5;        /* profit / up */
-  --ng-red: #ff5d6c;         /* loss / down */
-  --ng-indigo: #6c7bff;      /* accent gradient partner */
+  /* Ink */
+  --ng-ink: #141824;          /* headings / primary text */
+  --ng-muted: #5b6472;        /* body copy */
+  --ng-muted-2: #98a0ae;      /* captions */
 
-  --ng-line: rgba(243, 245, 251, 0.09);
-  --ng-glow: 0 0 90px -20px rgba(240, 180, 41, 0.6);
-  --ng-radius: 16px;
+  /* Brand & semantic */
+  --ng-gold: #f0a51e;         /* primary accent */
+  --ng-gold-dark: #d88f0b;    /* hover / pressed */
+  --ng-gold-soft: #fff3d6;    /* tinted gold surface */
+  --ng-navy: #1d2b4f;         /* deep brand navy */
+  --ng-teal: #00a170;         /* profit / up / positive */
+  --ng-red: #e2445c;          /* loss / down / negative */
+
+  /* Lines & effects */
+  --ng-line: #e6e9ef;
+  --ng-line-strong: #d3d8e0;
+  --ng-shadow-sm: 0 1px 2px rgba(20, 24, 36, 0.05);
+  --ng-shadow-md: 0 6px 24px -8px rgba(20, 24, 36, 0.12);
+  --ng-shadow-gold: 0 8px 24px -8px rgba(240, 165, 30, 0.45);
+  --ng-radius: 14px;
+  --ng-radius-lg: 20px;
   --ng-gutter: clamp(1rem, 4.5vw, 1.5rem);
 
-  color: var(--ng-ivory);
+  color: var(--ng-ink);
   background: var(--ng-bg);
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 
   width: 100%;
   max-width: 100%;
@@ -47,22 +61,18 @@
   height: auto;
 }
 
+/* ---------- Typography ---------- */
 .ng-root h1, .ng-root h2, .ng-root h3, .ng-root .ng-display {
   font-family: var(--font-grotesk), var(--font-inter), sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: -0.022em;
   line-height: 1.12;
+  color: var(--ng-ink);
   overflow-wrap: anywhere;
   word-break: break-word;
   max-width: 100%;
 }
 .ng-mono { font-family: var(--font-mono), ui-monospace, monospace; }
-
-/* Brand lockup on dark funded chrome */
-.ng-root .ng-lockup { align-items: center; }
-.ng-root .ng-wordmark__nivesh { color: var(--ng-ivory); }
-.ng-root .ng-wordmark__guru { color: var(--ng-teal); }
-.ng-root .ng-lockup__tag { color: var(--ng-muted); }
 
 .ng-root p,
 .ng-root li,
@@ -71,83 +81,106 @@
   overflow-wrap: anywhere;
 }
 
+/* ---------- Brand lockup on light chrome ---------- */
+.ng-root .ng-lockup { align-items: center; }
+.ng-root .ng-wordmark__nivesh { color: var(--ng-navy); }
+.ng-root .ng-wordmark__guru { color: var(--ng-gold); }
+.ng-root .ng-lockup__tag { color: var(--ng-muted-2); }
+
+/* ---------- Atoms ---------- */
 .ng-eyebrow {
   display: inline-flex; align-items: center; gap: 0.5rem;
-  font-size: 0.74rem; font-weight: 700; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--ng-gold);
+  font-size: 0.76rem; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ng-gold-dark);
 }
-.ng-eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--ng-gold); }
+.ng-eyebrow::before { content: ""; width: 20px; height: 2px; background: var(--ng-gold); border-radius: 2px; }
 
+/* Gradient accent text tuned for a light canvas */
 .ng-grad {
-  background: linear-gradient(100deg, var(--ng-gold) 0%, var(--ng-gold-soft) 45%, var(--ng-teal) 100%);
+  background: linear-gradient(95deg, var(--ng-gold-dark) 0%, var(--ng-gold) 50%, var(--ng-teal) 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 
-/* Buttons */
+/* ---------- Buttons ---------- */
 .ng-btn {
   display: inline-flex; align-items: center; gap: 0.5rem;
-  padding: 0.9rem 1.6rem; border-radius: 12px;
+  padding: 0.85rem 1.7rem; border-radius: 12px;
   font-weight: 600; font-size: 0.95rem; cursor: pointer;
   text-decoration: none; border: 1px solid transparent;
-  transition: transform 0.16s ease, box-shadow 0.25s ease, background 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.16s ease, box-shadow 0.25s ease,
+              background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  max-width: 100%; white-space: normal; text-align: center; justify-content: center;
 }
 .ng-btn:hover { transform: translateY(-2px); }
-.ng-btn-gold { background: var(--ng-gold); color: #241a02; box-shadow: var(--ng-glow); }
-.ng-btn-gold:hover { background: var(--ng-gold-soft); }
-.ng-btn-ghost { background: rgba(255,255,255,0.02); color: var(--ng-ivory); border-color: var(--ng-line); }
-.ng-btn-ghost:hover { border-color: var(--ng-gold); color: var(--ng-gold); }
 
-/* Surfaces */
+.ng-btn-gold {
+  background: var(--ng-gold); color: #2a1c00;
+  box-shadow: var(--ng-shadow-gold);
+}
+.ng-btn-gold:hover { background: var(--ng-gold-dark); }
+
+.ng-btn-navy {
+  background: var(--ng-navy); color: #fff;
+  box-shadow: var(--ng-shadow-md);
+}
+.ng-btn-navy:hover { background: #14203c; }
+
+.ng-btn-ghost {
+  background: #fff; color: var(--ng-ink);
+  border-color: var(--ng-line-strong);
+}
+.ng-btn-ghost:hover { border-color: var(--ng-gold); color: var(--ng-gold-dark); }
+
+/* ---------- Surfaces ---------- */
 .ng-card {
-  background: linear-gradient(180deg, var(--ng-bg-2), var(--ng-bg));
+  background: #fff;
   border: 1px solid var(--ng-line);
   border-radius: var(--ng-radius);
+  box-shadow: var(--ng-shadow-sm);
 }
-.ng-panel { background: var(--ng-bg-2); border: 1px solid var(--ng-line); border-radius: var(--ng-radius); }
+.ng-card:hover { box-shadow: var(--ng-shadow-md); }
+
+.ng-panel {
+  background: #fff;
+  border: 1px solid var(--ng-line);
+  border-radius: var(--ng-radius);
+  box-shadow: var(--ng-shadow-sm);
+}
 
 .ng-chip {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 12px; border-radius: 999px;
-  border: 1px solid var(--ng-line); background: rgba(255,255,255,0.02);
-  font-size: 0.8rem; color: var(--ng-muted);
+  border: 1px solid var(--ng-line); background: var(--ng-bg-soft);
+  font-size: 0.8rem; font-weight: 500; color: var(--ng-muted);
 }
 
 .ng-up { color: var(--ng-teal); }
 .ng-down { color: var(--ng-red); }
 .ng-muted { color: var(--ng-muted); }
 
+/* ---------- Layout ---------- */
 .ng-wrap {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
   padding-left: var(--ng-gutter);
   padding-right: var(--ng-gutter);
   min-width: 0;
 }
-.ng-section { padding: clamp(3.5rem, 8vw, 7rem) 0; }
+.ng-section { padding: clamp(3.5rem, 8vw, 6.5rem) 0; }
+.ng-section-alt { background: var(--ng-bg-soft); }
 .ng-hairline { border: none; border-top: 1px solid var(--ng-line); }
 
-.ng-btn {
-  max-width: 100%;
-  white-space: normal;
-  text-align: center;
-  justify-content: center;
-}
-.ng-card,
-.ng-panel {
-  max-width: 100%;
-  min-width: 0;
-}
-
-/* Glow backdrop for hero / CTA */
+/* ---------- Subtle hero backdrop ---------- */
 .ng-aura {
   position: absolute; inset: 0; overflow: hidden; pointer-events: none;
   background:
-    radial-gradient(600px 320px at 80% 10%, rgba(240,180,41,0.14), transparent 60%),
-    radial-gradient(560px 320px at 15% 30%, rgba(108,123,255,0.16), transparent 60%),
-    radial-gradient(500px 300px at 50% 100%, rgba(47,214,165,0.10), transparent 60%);
+    radial-gradient(620px 340px at 85% 0%, rgba(240, 165, 30, 0.09), transparent 62%),
+    radial-gradient(560px 320px at 8% 20%, rgba(29, 43, 79, 0.06), transparent 60%),
+    radial-gradient(520px 320px at 55% 110%, rgba(0, 161, 112, 0.06), transparent 62%);
 }
 
+/* ---------- Focus & motion ---------- */
 .ng-root a:focus-visible, .ng-root button:focus-visible {
   outline: 2px solid var(--ng-gold); outline-offset: 3px; border-radius: 8px;
 }
@@ -157,6 +190,7 @@
 .ng-marquee-fast { animation-duration: 22s; }
 .ng-marquee:hover { animation-play-state: paused; }
 
+/* ---------- Responsive ---------- */
 @media (max-width: 640px) {
   .ng-section { padding: 2.75rem 0; }
   .ng-root h1 { font-size: clamp(1.85rem, 8vw, 2.6rem) !important; }

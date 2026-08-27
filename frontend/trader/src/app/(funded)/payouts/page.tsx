@@ -54,7 +54,7 @@ export default function PayoutsPage() {
                   <th style={{ textAlign: "left", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-muted)", fontWeight: 500 }}>Trader</th>
                   <th style={{ textAlign: "left", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-muted)", fontWeight: 500 }}>City</th>
                   <th style={{ textAlign: "left", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-muted)", fontWeight: 500 }}>Processed</th>
-                  <th style={{ textAlign: "right", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-gold)" }}>Amount</th>
+                  <th style={{ textAlign: "right", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-gold-dark)" }}>Amount</th>
                 </tr>
               </thead>
               <tbody>

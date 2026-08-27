@@ -39,8 +39,8 @@ export function ChallengeSelector() {
                 padding: "0.7rem 1.2rem",
                 borderRadius: 10,
                 border: `1px solid ${active ? "var(--ng-gold)" : "var(--ng-line)"}`,
-                background: active ? "rgba(240,180,41,0.1)" : "transparent",
-                color: active ? "var(--ng-gold)" : "var(--ng-muted)",
+                background: active ? "var(--ng-gold-soft)" : "transparent",
+                color: active ? "var(--ng-gold-dark)" : "var(--ng-muted)",
                 fontWeight: 600,
                 cursor: "pointer",
                 fontSize: "0.9rem",
@@ -53,7 +53,7 @@ export function ChallengeSelector() {
                     marginLeft: 8,
                     fontSize: "0.6rem",
                     background: "var(--ng-teal)",
-                    color: "#04231a",
+                    color: "#fff",
                     padding: "2px 6px",
                     borderRadius: 999,
                     letterSpacing: "0.06em",
@@ -86,7 +86,7 @@ export function ChallengeSelector() {
                   borderRadius: 10,
                   border: `1px solid ${active ? "var(--ng-gold)" : "var(--ng-line)"}`,
                   background: active ? "var(--ng-gold)" : "transparent",
-                  color: active ? "#241a02" : "var(--ng-ivory)",
+                  color: active ? "#2a1c00" : "var(--ng-ink)",
                   fontWeight: 600,
                   cursor: "pointer",
                 }}
@@ -135,7 +135,7 @@ export function ChallengeSelector() {
           marginTop: "1.8rem",
           padding: "1.4rem",
           borderRadius: 14,
-          background: "var(--ng-bg-2)",
+          background: "var(--ng-bg-soft)",
           border: "1px solid var(--ng-line)",
           display: "flex",
           justifyContent: "space-between",
@@ -155,7 +155,7 @@ export function ChallengeSelector() {
           <button
             onClick={copyCode}
             className="ng-mono"
-            style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 8, background: "none", border: "none", color: "var(--ng-gold)", cursor: "pointer", fontSize: "0.85rem" }}
+            style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 8, background: "none", border: "none", color: "var(--ng-gold-dark)", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600 }}
           >
             {copied ? <Check size={15} /> : <Copy size={15} />}
             {copied ? "Code copied" : `Use code ${site.discountCode} — ${site.discountPct}% off`}

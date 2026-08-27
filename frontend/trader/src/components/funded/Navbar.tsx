@@ -105,7 +105,7 @@ export function Navbar() {
         <style>{`
           .ng-announce {
             background: linear-gradient(90deg, var(--ng-gold), var(--ng-gold-soft));
-            color: #241a02;
+            color: #2a1c00;
             text-align: center;
             font-size: 0.85rem;
             font-weight: 600;
@@ -117,7 +117,7 @@ export function Navbar() {
             z-index: 50;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            background: rgba(7,10,22,0.86);
+            background: rgba(255,255,255,0.9);
             border-bottom: 1px solid var(--ng-line);
           }
           .ng-header__bar {
@@ -134,7 +134,7 @@ export function Navbar() {
             gap: 8px;
             min-width: 0;
             text-decoration: none;
-            color: var(--ng-ivory);
+            color: var(--ng-ink);
             flex: 1;
           }
           .ng-header__logo {
@@ -162,13 +162,15 @@ export function Navbar() {
             font-size: 15px;
             font-weight: 500;
             white-space: nowrap;
+            transition: color 0.18s ease;
           }
-          .ng-nav-link.is-active { color: var(--ng-gold); }
+          .ng-nav-link:hover { color: var(--ng-ink); }
+          .ng-nav-link.is-active { color: var(--ng-gold-dark); }
           .ng-mobile-toggle {
             display: none;
             background: none;
             border: none;
-            color: var(--ng-ivory);
+            color: var(--ng-ink);
             cursor: pointer;
             padding: 8px;
             margin-right: -8px;
@@ -183,13 +185,13 @@ export function Navbar() {
             -webkit-overflow-scrolling: touch;
           }
           .ng-mobile-link {
-            color: var(--ng-ivory);
+            color: var(--ng-ink);
             text-decoration: none;
             padding: 12px 0;
             border-bottom: 1px solid var(--ng-line);
             font-size: 16px;
           }
-          .ng-mobile-link.is-active { color: var(--ng-gold); }
+          .ng-mobile-link.is-active { color: var(--ng-gold-dark); }
           @media (max-width: 820px) {
             .ng-desktop-nav { display: none !important; }
             .ng-mobile-toggle { display: grid !important; place-items: center; }

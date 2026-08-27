@@ -7,7 +7,7 @@ const topics = ["Buying a challenge", "Payout question", "Rules clarification", 
 const field: React.CSSProperties = {
   width: "100%", padding: "0.8rem 1rem", borderRadius: 12,
   border: "1px solid var(--ng-line)", background: "var(--ng-bg)",
-  color: "var(--ng-ivory)", fontSize: "1rem", fontFamily: "inherit",
+  color: "var(--ng-ink)", fontSize: "1rem", fontFamily: "inherit",
 };
 const label: React.CSSProperties = { display: "block", fontSize: "0.82rem", marginBottom: 8, color: "var(--ng-muted)", fontWeight: 500 };
 

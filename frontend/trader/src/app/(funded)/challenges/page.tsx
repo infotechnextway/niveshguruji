@@ -45,7 +45,7 @@ export default function ChallengesPage() {
                 <tr>
                   <th style={{ textAlign: "left", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-muted)", fontWeight: 500 }}>Account</th>
                   {models.map((m) => (
-                    <th key={m.id} style={{ textAlign: "right", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-gold)" }}>
+                    <th key={m.id} style={{ textAlign: "right", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-gold-dark)" }}>
                       {m.name}
                     </th>
                   ))}

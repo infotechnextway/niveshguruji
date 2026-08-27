@@ -14,12 +14,12 @@ export function PayoutMarquee() {
           >
             <span
               className="ng-mono"
-              style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.1em", color: "var(--ng-teal)", border: "1px solid rgba(47,214,165,0.4)", borderRadius: 6, padding: "2px 7px" }}
+              style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.1em", color: "var(--ng-teal)", border: "1px solid rgba(0,161,112,0.35)", background: "rgba(0,161,112,0.07)", borderRadius: 6, padding: "2px 7px" }}
             >
               PAID
             </span>
             <div>
-              <div className="ng-mono" style={{ fontSize: "1.05rem", fontWeight: 600 }}>{inr(p.amount)}</div>
+              <div className="ng-mono" style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--ng-ink)" }}>{inr(p.amount)}</div>
               <div className="ng-muted" style={{ fontSize: "0.78rem" }}>
                 {p.name} · {p.city} · {p.hrs}
               </div>

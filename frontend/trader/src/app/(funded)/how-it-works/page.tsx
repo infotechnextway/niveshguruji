@@ -53,7 +53,7 @@ export default function HowItWorksPage() {
                 <tr>
                   <th style={{ textAlign: "left", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-muted)", fontWeight: 500 }}>Metric</th>
                   {models.map((m) => (
-                    <th key={m.id} style={{ textAlign: "right", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-gold)" }}>{m.name}</th>
+                    <th key={m.id} style={{ textAlign: "right", padding: "14px 16px", borderBottom: "1px solid var(--ng-line)", color: "var(--ng-gold-dark)" }}>{m.name}</th>
                   ))}
                 </tr>
               </thead>

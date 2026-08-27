@@ -4,7 +4,7 @@ import { nav, site } from "@/lib/funded/site";
 
 export function Footer() {
   return (
-    <footer style={{ borderTop: "1px solid var(--ng-line)", background: "var(--ng-bg)", overflow: "hidden" }}>
+    <footer style={{ borderTop: "1px solid var(--ng-line)", background: "var(--ng-bg-soft)", overflow: "hidden" }}>
       <div
         className="ng-wrap ng-foot-grid"
         style={{
@@ -19,7 +19,7 @@ export function Footer() {
           <Link href="/" aria-label={site.name} style={{ display: "inline-block", maxWidth: "100%" }}>
             <BrandLockup height={48} />
           </Link>
-          <p className="ng-muted" style={{ marginTop: 14, lineHeight: 1.6 }}>
+          <p className="ng-muted" style={{ marginTop: 14, lineHeight: 1.6, fontSize: 14.5 }}>
             {site.tagline} A funded-trader programme built for India — priced in INR, paid in INR. Based in {site.city}.
           </p>
         </div>
@@ -29,16 +29,16 @@ export function Footer() {
           <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
             {nav.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="ng-muted" style={{ textDecoration: "none", fontSize: 15 }}>
+                <Link href={item.href} className="ng-foot-link" style={{ textDecoration: "none", fontSize: 15 }}>
                   {item.label}
                 </Link>
               </li>
             ))}
             <li>
-              <Link href="/login" className="ng-muted" style={{ textDecoration: "none", fontSize: 15 }}>Login</Link>
+              <Link href="/login" className="ng-foot-link" style={{ textDecoration: "none", fontSize: 15 }}>Login</Link>
             </li>
             <li>
-              <Link href="/admin" className="ng-muted" style={{ textDecoration: "none", fontSize: 15 }}>Admin</Link>
+              <Link href="/admin" className="ng-foot-link" style={{ textDecoration: "none", fontSize: 15 }}>Admin</Link>
             </li>
           </ul>
         </div>
@@ -47,7 +47,7 @@ export function Footer() {
           <h4 className="ng-eyebrow" style={{ marginBottom: 16 }}>Support</h4>
           <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
             <li>
-              <a href={`mailto:${site.email}`} className="ng-muted" style={{ textDecoration: "none", fontSize: 15 }}>
+              <a href={`mailto:${site.email}`} className="ng-foot-link" style={{ textDecoration: "none", fontSize: 15 }}>
                 {site.email}
               </a>
             </li>
@@ -71,6 +71,11 @@ export function Footer() {
       </div>
 
       <style>{`
+        .ng-foot-link {
+          color: var(--ng-muted);
+          transition: color 0.18s ease;
+        }
+        .ng-foot-link:hover { color: var(--ng-gold-dark); }
         @media (max-width: 820px) {
           .ng-foot-grid { grid-template-columns: 1fr 1fr !important; gap: 28px !important; }
           .ng-foot-brand { grid-column: 1 / -1; max-width: none !important; }
