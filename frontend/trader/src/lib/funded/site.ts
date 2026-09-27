@@ -1,12 +1,12 @@
 // Single source of truth: brand, nav, challenge pricing (INR), payouts, copy.
-// Content sourced from finlixcapital.com — edit here and every page updates.
+// Edit here and every page updates.
 
 export const site = {
-  name: "FinLix Capital",
-  short: "FinLix",
-  domain: "finlixcapital.com",
+  name: "Nivesh Guruji",
+  short: "NiveshGuruji",
+  domain: "niveshguruji.com",
   tagline: "Trade the World's Capital With Institutional Confidence.",
-  email: "support@finlixcapital.com",
+  email: "support@niveshguruji.com",
   phone: "+91 98260 00000",
   city: "Indore, Madhya Pradesh",
   discountCode: "GURU30",
@@ -53,7 +53,7 @@ export const models: {
   { id: "instant", name: "Instant", tagline: "Skip evaluation. Trade funded today." },
 ];
 
-// Featured funding programs (FinLix-style cards)
+// Featured funding programs (broker-style cards)
 export const fundingPrograms = [
   {
     capital: "₹5L",
@@ -192,8 +192,8 @@ export const steps = [
 
 export const faqs = [
   {
-    q: "What is FinLix Capital?",
-    a: "FinLix Capital is a performance-based proprietary trading evaluation platform for traders in India. We combine trading education with simulated challenge accounts (virtual capital) so you can demonstrate discipline and risk management. We are not a brokerage and do not provide investment advice.",
+    q: "What is Nivesh Guruji?",
+    a: "Nivesh Guruji is a performance-based proprietary trading evaluation platform for traders in India. We combine trading education with simulated challenge accounts (virtual capital) so you can demonstrate discipline and risk management. We are not a brokerage and do not provide investment advice.",
   },
   {
     q: "How does the evaluation work?",
@@ -220,8 +220,8 @@ export const faqs = [
     a: "Most payouts are processed within 24 hours to your Indian bank account or UPI once approved. The first payout can be requested 14 days after your first funded trade, subject to KYC and rule compliance.",
   },
   {
-    q: "Is FinLix Capital registered with SEBI?",
-    a: "FinLix Capital is not registered with SEBI as an investment advisor, research analyst, stock broker, or portfolio manager. We operate as an EdTech and trading evaluation company providing simulated trading challenges and performance-based evaluation.",
+    q: "Is Nivesh Guruji registered with SEBI?",
+    a: "Nivesh Guruji is not registered with SEBI as an investment advisor, research analyst, stock broker, or portfolio manager. We operate as an EdTech and trading evaluation company providing simulated trading challenges and performance-based evaluation.",
   },
 ];
 

@@ -8,7 +8,7 @@ import { inr } from "@/lib/funded/format";
 
 export const metadata: Metadata = {
   title: "Payouts",
-  description: "See real INR payouts, average payout time, and how withdrawals work at FinLix Capital.",
+  description: "See real INR payouts, average payout time, and how withdrawals work at Nivesh Guruji.",
 };
 
 export default function PayoutsPage() {

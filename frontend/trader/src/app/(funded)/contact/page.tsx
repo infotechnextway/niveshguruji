@@ -7,7 +7,7 @@ import { site, partnerPerks } from "@/lib/funded/site";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Reach FinLix Capital support, or partner with us as an affiliate.",
+  description: "Reach Nivesh Guruji support, or partner with us as an affiliate.",
 };
 
 export default function ContactPage() {

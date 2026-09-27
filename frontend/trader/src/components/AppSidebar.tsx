@@ -39,7 +39,7 @@ export function AppSidebar({
       aria-label="Primary"
     >
       <div className="pts-sidebar__top">
-        <Link href="/dashboard" className="pts-sidebar__brand" aria-label="FinLix Capital home" onClick={onNavigate}>
+        <Link href="/dashboard" className="pts-sidebar__brand" aria-label="NiveshGuru home" onClick={onNavigate}>
           {iconOnly ? <BrandMonogram size={32} className="pts-sidebar__mark" /> : <BrandMark size={32} className="pts-sidebar__mark" />}
           <span className="pts-sidebar__brand-text">
             <span className="pts-sidebar__brand-name"><BrandWordmark compact /></span>

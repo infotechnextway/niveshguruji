@@ -8,7 +8,7 @@ import { inr, discounted } from "@/lib/funded/format";
 
 export const metadata: Metadata = {
   title: "Challenges",
-  description: "Instant, 1-Step and 2-Step funded-trader challenges from ₹5 lakh to ₹1 crore. Prove your edge with FinLix Capital.",
+  description: "Instant, 1-Step and 2-Step funded-trader challenges from ₹5 lakh to ₹1 crore, priced in INR.",
 };
 
 export default function ChallengesPage() {

@@ -93,7 +93,7 @@ export default function HomePage() {
       {/* ================= WHY CHOOSE / FEATURES ================= */}
       <section className="ng-section">
         <div className="ng-wrap">
-          <SectionHeading eyebrow="Why FinLix Capital" title="Built for traders, not gatekeepers" />
+          <SectionHeading eyebrow="Why Nivesh Guruji" title="Built for traders, not gatekeepers" />
           <div className="ng-why" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 22, marginTop: "3rem" }}>
             {whyChoose.map((v, i) => {
               const Icon = featureIcons[i % featureIcons.length];

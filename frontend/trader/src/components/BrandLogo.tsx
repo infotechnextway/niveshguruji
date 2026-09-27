@@ -42,12 +42,12 @@ type WordmarkProps = {
   className?: string;
 };
 
-/** FINLIX (navy) CAPITAL (gold). */
+/** NIVESH (navy/white) + GURU (gold). */
 export function BrandWordmark({ compact = false, className }: WordmarkProps) {
   return (
     <span className={`ng-wordmark${compact ? ' ng-wordmark--compact' : ''}${className ? ` ${className}` : ''}`}>
-      <span className="ng-wordmark__nivesh">FINLIX</span>
-      <span className="ng-wordmark__guru">CAPITAL</span>
+      <span className="ng-wordmark__nivesh">NIVESH</span>
+      <span className="ng-wordmark__guru">GURU</span>
     </span>
   );
 }
@@ -69,7 +69,7 @@ export function BrandLockup({ useImage = false, className, height = 56 }: Lockup
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src="/brand/logo.png"
-        alt="FinLix Capital — India's Premier Prop Trading Firm"
+        alt="NiveshGuru — Investment Simplified"
         className={className}
         style={{
           display: 'block',
@@ -89,12 +89,12 @@ export function BrandLockup({ useImage = false, className, height = 56 }: Lockup
     <div
       className={`ng-lockup${className ? ` ${className}` : ''}`}
       style={{ minHeight: height }}
-      aria-label="FinLix Capital — India's Premier Prop Trading Firm"
+      aria-label="NiveshGuru — Investment Simplified"
     >
       <BrandMark size={mark} />
       <div className="ng-lockup__text">
         <BrandWordmark />
-        <span className="ng-lockup__tag">Prop Trading · Evaluated</span>
+        <span className="ng-lockup__tag">Investment · Simplified</span>
       </div>
     </div>
   );

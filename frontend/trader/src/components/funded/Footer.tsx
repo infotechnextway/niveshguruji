@@ -60,11 +60,10 @@ export function Footer() {
       <div className="ng-wrap" style={{ paddingBottom: 40 }}>
         <hr className="ng-hairline" style={{ marginBottom: 20 }} />
         <p className="ng-muted" style={{ fontSize: 12.5, lineHeight: 1.6 }}>
-          All accounts are simulated. FinLix Capital does not provide investment advice, brokerage, or asset-management
-          services, and challenge fees are for access to an evaluation of simulated trading. FinLix Capital is not
-          registered with SEBI as an investment advisor, research analyst, stock broker, or portfolio manager. We operate
-          as an EdTech and trading evaluation company. Trading carries substantial risk of loss. Payouts reflect
-          performance on simulated accounts subject to the programme terms.
+          All accounts are simulated. Nivesh Guruji does not provide investment advice, brokerage, or asset-management
+          services, and challenge fees are for access to an evaluation of simulated trading. Trading carries substantial
+          risk of loss. Payouts reflect performance on simulated accounts subject to the programme terms. Nothing here is
+          a solicitation to trade real securities.
         </p>
         <p className="ng-muted" style={{ fontSize: 12.5, marginTop: 12 }}>
           © {new Date().getFullYear()} {site.name}. All rights reserved.
