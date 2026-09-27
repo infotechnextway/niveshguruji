@@ -1,16 +1,18 @@
 // Single source of truth: brand, nav, challenge pricing (INR), payouts, copy.
-// Edit here and every page updates.
+// Content sourced from finlixcapital.com — edit here and every page updates.
 
 export const site = {
-  name: "Nivesh Guruji",
-  short: "NiveshGuruji",
-  domain: "niveshguruji.com",
-  tagline: "Get funded. Trade big. Keep up to 90%.",
-  email: "support@niveshguruji.com",
+  name: "FinLix Capital",
+  short: "FinLix",
+  domain: "finlixcapital.com",
+  tagline: "Trade the World's Capital With Institutional Confidence.",
+  email: "support@finlixcapital.com",
   phone: "+91 98260 00000",
   city: "Indore, Madhya Pradesh",
   discountCode: "GURU30",
   discountPct: 30,
+  profitSplit: "80%",
+  taglineShort: "India's Premier Prop Trading Firm",
 };
 
 export const nav = [
@@ -25,7 +27,7 @@ export const heroStats = [
   { value: "₹72 Cr+", label: "paid to traders" },
   { value: "38,000+", label: "funded traders" },
   { value: "24 hrs", label: "avg. payout time" },
-  { value: "90%", label: "max profit split" },
+  { value: "80%", label: "max profit split" },
 ];
 
 // Live ticker (illustrative — wire to a real feed later)
@@ -51,6 +53,52 @@ export const models: {
   { id: "instant", name: "Instant", tagline: "Skip evaluation. Trade funded today." },
 ];
 
+// Featured funding programs (FinLix-style cards)
+export const fundingPrograms = [
+  {
+    capital: "₹5L",
+    capitalFull: "5 Lakh",
+    startingAt: 5999,
+    highlights: [
+      "5 Lakh Simulated Capital",
+      "Up to 80% Profit Split",
+      "No Time Limit",
+      "Daily Drawdown: 3%",
+      "Max Drawdown: 6%",
+    ],
+    popular: false,
+  },
+  {
+    capital: "₹25L",
+    capitalFull: "25 Lakh",
+    startingAt: 26999,
+    highlights: [
+      "25 Lakh Simulated Capital",
+      "Up to 80% Profit Split",
+      "No Time Limit",
+      "Daily Drawdown: 3%",
+      "Max Drawdown: 6%",
+      "Priority Support",
+    ],
+    popular: true,
+  },
+  {
+    capital: "₹1Cr",
+    capitalFull: "1 Crore",
+    startingAt: 104599,
+    highlights: [
+      "1 Crore Simulated Capital",
+      "Up to 80% Profit Split",
+      "No Time Limit",
+      "Daily Drawdown: 3%",
+      "Max Drawdown: 6%",
+      "Priority Support",
+      "Dedicated Account Manager",
+    ],
+    popular: false,
+  },
+];
+
 // Metric rows shown per model (label → value by model)
 export const metricRows: { label: string; values: Record<ModelId, string> }[] = [
   { label: "Phase 1 profit target", values: { twoStep: "8%", oneStep: "8%", instant: "—" } },
@@ -62,7 +110,7 @@ export const metricRows: { label: string; values: Record<ModelId, string> }[] = 
 ];
 
 export const rewardRows = [
-  { label: "Profit split", value: "Up to 90%" },
+  { label: "Profit split", value: "Up to 80%" },
   { label: "Payout frequency", value: "Every 14 days" },
   { label: "Consistency rule", value: "None" },
   { label: "Weekend holding", value: "Allowed" },
@@ -102,7 +150,7 @@ export const whyChoose = [
     body: "99% of withdrawals are processed within a day, straight to your bank or UPI. No ticket queues, no chasing.",
   },
   {
-    title: "Keep up to 90%",
+    title: "Keep up to 80%",
     body: "One of the highest splits in India. Scale your account as you stay consistent and your share climbs with you.",
   },
   {
@@ -118,44 +166,62 @@ export const whyChoose = [
 export const steps = [
   {
     n: "01",
-    kicker: "Evaluation",
-    title: "Prove your edge",
-    body: "Pick a challenge and account size, hit the profit target while staying inside the drawdown limits. Instant accounts skip this entirely.",
+    kicker: "Programme",
+    title: "Choose an Evaluation Program",
+    body: "Select the evaluation program that best matches your trading goals and experience. We offer Phase 1 and Phase 2 tracks to suit different styles.",
   },
   {
     n: "02",
-    kicker: "Get funded",
-    title: "Trade a funded account",
-    body: "Clear the evaluation and receive a simulated funded account. Trade it like your own and earn real payouts on your performance.",
+    kicker: "Evaluation",
+    title: "Complete the Evaluation",
+    body: "Meet the predefined trading objectives and risk parameters in a simulated environment. Demonstrate discipline and consistent risk management.",
   },
   {
     n: "03",
-    kicker: "Scale",
-    title: "Grow your capital",
-    body: "Stay consistent and unlock larger account sizes and a higher profit split — up to ₹2 crore in simulated capital.",
+    kicker: "Qualified",
+    title: "Become a Qualified Trader",
+    body: "Upon successful evaluation, you will receive access to a funded trading account subject to our Terms & Conditions.",
+  },
+  {
+    n: "04",
+    kicker: "Payouts",
+    title: "Receive Performance-Based Payouts",
+    body: "Eligible traders may receive performance-based payouts in accordance with the payout policy and applicable terms.",
   },
 ];
 
 export const faqs = [
   {
-    q: "Is this real money or simulated?",
-    a: "You trade on simulated funded accounts. Payouts are real and are paid on your simulated performance, in line with our terms. This is the standard model used by prop firms worldwide.",
+    q: "What is FinLix Capital?",
+    a: "FinLix Capital is a performance-based proprietary trading evaluation platform for traders in India. We combine trading education with simulated challenge accounts (virtual capital) so you can demonstrate discipline and risk management. We are not a brokerage and do not provide investment advice.",
   },
   {
-    q: "How fast are payouts?",
-    a: "Most payouts are processed within 24 hours to your Indian bank account or UPI once approved. The first payout can be requested 14 days after your first funded trade.",
+    q: "How does the evaluation work?",
+    a: "You trade on simulated accounts with virtual capital. Meet the predefined trading objectives and risk parameters — demonstrate discipline and consistent risk management. Upon success, you become eligible for a funded account.",
   },
   {
-    q: "What can I trade?",
-    a: "Index CFDs (Nifty, Bank Nifty), forex majors, gold, crude, and major crypto CFDs. Weekend holding, news trading, and automated strategies are all allowed.",
+    q: "What is the profit split?",
+    a: "Eligible traders can earn up to 80% profit split on their simulated trading performance. The split scales as you stay consistent and grow your track record.",
   },
   {
-    q: "What happens if I break a rule?",
+    q: "Is there a time limit?",
+    a: "No. There is no arbitrary time pressure on challenges. Trade at your own pace and demonstrate your edge without a countdown.",
+  },
+  {
+    q: "What markets can I trade?",
+    a: "Index CFDs (Nifty, Bank Nifty), equity futures & options, forex majors, gold, crude, and major crypto CFDs. Weekend holding, news trading, and automated strategies are all allowed.",
+  },
+  {
+    q: "What happens if I fail the challenge?",
     a: "Breaching the daily or overall loss limit ends that account. You keep any approved payouts already made and can start a fresh challenge whenever you like.",
   },
   {
-    q: "Do you serve traders across India?",
-    a: "Yes. Nivesh Guruji is built for Indian traders, priced in INR, with local payment methods and INR payouts. Support is based in Indore.",
+    q: "How do payouts work?",
+    a: "Most payouts are processed within 24 hours to your Indian bank account or UPI once approved. The first payout can be requested 14 days after your first funded trade, subject to KYC and rule compliance.",
+  },
+  {
+    q: "Is FinLix Capital registered with SEBI?",
+    a: "FinLix Capital is not registered with SEBI as an investment advisor, research analyst, stock broker, or portfolio manager. We operate as an EdTech and trading evaluation company providing simulated trading challenges and performance-based evaluation.",
   },
 ];
 
@@ -163,4 +229,32 @@ export const partnerPerks = [
   { title: "Up to 15% commission", body: "Earn on every challenge your audience buys, for the life of the account." },
   { title: "Real-time dashboard", body: "Track clicks, conversions, and payouts with transparent reporting." },
   { title: "Fast affiliate payouts", body: "Withdraw your commissions on the same 24-hour rails our traders use." },
+];
+
+// Testimonials
+export const testimonials = [
+  {
+    name: "Rahul S.",
+    city: "Indore",
+    text: "Cleared the 25L challenge in 3 weeks. The rules are fair and payouts are genuinely fast — got my first withdrawal in under 24 hours.",
+  },
+  {
+    name: "Meena K.",
+    city: "Pune",
+    text: "Finally a prop firm that treats Indian traders seriously. INR pricing, UPI payouts, and no hidden rules. Been funded for 4 months now.",
+  },
+  {
+    name: "Arjun P.",
+    city: "Delhi",
+    text: "The dashboard is clean, execution is fast, and the support team actually responds. Best prop trading experience I've had in India.",
+  },
+];
+
+// Top traders (illustrative leaderboard)
+export const topTraders = [
+  { rank: 1, name: "Vikram T.", city: "Mumbai", profit: 485000 },
+  { rank: 2, name: "Sana R.", city: "Hyderabad", profit: 372500 },
+  { rank: 3, name: "Arjun P.", city: "Delhi", profit: 312075 },
+  { rank: 4, name: "Karan M.", city: "Surat", profit: 268400 },
+  { rank: 5, name: "Rahul S.", city: "Indore", profit: 184320 },
 ];

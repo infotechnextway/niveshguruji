@@ -1,0 +1,1 @@
+Docker Compose (multi-stage build targeting `../backend`), Redis 7 Alpine with AOF persistence, Nginx 1.27 Alpine acting as TLS terminator and HTTP/WebSocket reverse proxy, with Let's Encrypt certificates mounted from an external `certbot-certs` volume.

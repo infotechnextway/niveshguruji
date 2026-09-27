@@ -76,6 +76,7 @@ function LoginInner() {
         </div>
         <h1 className="lp-title">Welcome back</h1>
         <p className="dim" style={{ fontSize: 12, marginTop: -12 }}>Sign in to continue your evaluation.</p>
+        <p className="dim" style={{ fontSize: 11, marginTop: -8, color: 'var(--accent)', fontWeight: 500 }}>Trade the World&apos;s Capital with Institutional Confidence</p>
         <form onSubmit={signIn} className="vstack gap-3">
           <div className="vstack gap-1">
             <label className="lbl">Email or username</label>

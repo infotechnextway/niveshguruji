@@ -60,8 +60,8 @@ export function AdminSidebar() {
         <div className="admin-sb__brand-text">
           <span className="admin-sb__brand-name">
             <span className="ng-wordmark ng-wordmark--compact">
-              <span className="ng-wordmark__nivesh">NIVESH</span>
-              <span className="ng-wordmark__guru">GURU</span>
+              <span className="ng-wordmark__nivesh">FINLIX</span>
+              <span className="ng-wordmark__guru">CAPITAL</span>
             </span>
           </span>
           <span className="admin-sb__brand-tag">Admin console</span>

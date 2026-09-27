@@ -1,0 +1,4 @@
+- Money is represented as integer paise everywhere — no floating-point currency values.
+- Cross-process coordination uses Redis Pub/Sub events combined with single-writer-per-account locks keyed by account/challenge identifiers.
+- Configuration is stored in a DB-backed registry edited through the admin UI rather than environment variables.
+- Each platform phase (P0–P6) is documented in its own `docs/P*-*.md` file and tracked as a checklist in the README.

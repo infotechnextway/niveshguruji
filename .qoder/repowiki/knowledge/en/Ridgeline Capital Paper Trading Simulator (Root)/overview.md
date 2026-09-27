@@ -1,0 +1,1 @@
+Top-level workspace for the Indian paper-trading simulator, uniting a NestJS modular monolith backend, Next.js frontend, Docker Compose deployment, and phase-based documentation under one CI pipeline.

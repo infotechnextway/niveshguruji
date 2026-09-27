@@ -57,7 +57,7 @@ export function Navbar() {
               Login
             </Link>
             <Link href="/register" className="ng-btn ng-btn-gold" style={{ padding: "0.6rem 1.2rem" }}>
-              Get funded
+              Start Challenge
             </Link>
           </nav>
 
@@ -97,7 +97,7 @@ export function Navbar() {
               className="ng-btn ng-btn-gold"
               style={{ marginTop: 16, justifyContent: "center", width: "100%" }}
             >
-              Get funded
+              Start Challenge
             </Link>
           </nav>
         )}

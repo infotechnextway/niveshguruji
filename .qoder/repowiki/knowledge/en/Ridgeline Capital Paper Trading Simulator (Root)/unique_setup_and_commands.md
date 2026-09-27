@@ -1,0 +1,1 @@
+Dev requires launching two backend processes (`npm run start:api:dev` on :4000, `npm run start:engine:dev` on :4100) plus a separate `frontend/trader` dev server that proxies `/api/*`; production is deployed via `docker-compose` in `deploy/` behind Nginx with TLS.

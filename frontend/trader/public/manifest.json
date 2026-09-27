@@ -1,12 +1,12 @@
 {
-  "name": "NiveshGuru — Paper Trading",
-  "short_name": "NiveshGuru",
+  "name": "FinLix Capital — Paper Trading",
+  "short_name": "FinLix",
   "description": "Practice trading Indian markets and prove your edge through structured evaluations.",
   "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#2BA89A",
+  "theme_color": "#f0a51e",
   "background_color": "#F7F8FA",
   "icons": [
     {

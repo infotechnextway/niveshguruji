@@ -63,6 +63,9 @@ function AdminLoginForm() {
         <p className="dim" style={{ fontSize: 12, marginTop: -12 }}>
           Access KYC, users, instruments, and system configuration.
         </p>
+        <p className="dim" style={{ fontSize: 11, marginTop: -8, color: 'var(--accent)', fontWeight: 500 }}>
+          FinLix Capital — Internal Operations
+        </p>
         <form onSubmit={signIn} className="vstack gap-3">
           <div className="vstack gap-1">
             <label className="lbl">Email</label>
@@ -72,7 +75,7 @@ function AdminLoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@niveshguru.local"
+              placeholder="admin@finlixcapital.local"
               autoComplete="username"
             />
           </div>

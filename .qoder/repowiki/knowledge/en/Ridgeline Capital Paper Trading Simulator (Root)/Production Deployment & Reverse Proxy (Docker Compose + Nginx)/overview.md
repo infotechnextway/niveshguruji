@@ -1,0 +1,1 @@
+Docker Compose deployment for the backend's API and engine services behind an Nginx reverse proxy with TLS, exposing Redis as shared state and mounting persistent volumes for KYC data and Let's Encrypt certs.

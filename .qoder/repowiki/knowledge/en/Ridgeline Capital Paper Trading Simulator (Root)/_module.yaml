@@ -1,0 +1,11 @@
+schema_version: 1
+module_path: ""
+title: Ridgeline Capital Paper Trading Simulator (Root)
+scope:
+    - README.md
+    - .gitignore
+    - .github/
+    - docs/
+source_files: []
+depends_on: []
+related_to: []

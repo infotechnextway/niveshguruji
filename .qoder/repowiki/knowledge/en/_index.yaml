@@ -1,0 +1,29 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: en-US
+branch: fix/dhan-chart-history
+nodes_managed: true
+exported_at: "2026-08-27T21:20:11Z"
+modules:
+    "":
+        dir_name: Ridgeline Capital Paper Trading Simulator (Root)
+        title: Ridgeline Capital Paper Trading Simulator (Root)
+        scope:
+            - README.md
+            - .gitignore
+            - .github/
+            - docs/
+        source_files: []
+        children:
+            - deploy_infra
+        depends_on: []
+        related_to: []
+    deploy_infra:
+        dir_name: Production Deployment & Reverse Proxy (Docker Compose + Nginx)
+        title: Production Deployment & Reverse Proxy (Docker Compose + Nginx)
+        scope:
+            - deploy/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []

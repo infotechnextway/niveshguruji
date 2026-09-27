@@ -17,9 +17,9 @@ export default function HowItWorksPage() {
         <div className="ng-wrap" style={{ position: "relative", padding: "4.5rem 1.5rem 2rem", maxWidth: 820 }}>
           <Reveal>
             <Eyebrow>How it works</Eyebrow>
-            <h1 style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)", marginTop: "1.2rem" }}>Prove it once. Get funded. Scale up.</h1>
+            <h1 style={{ fontSize: "clamp(2.4rem, 5.5vw, 4rem)", marginTop: "1.2rem" }}>Your Path to Qualification</h1>
             <p className="ng-muted" style={{ marginTop: "1.4rem", fontSize: "1.15rem", lineHeight: 1.6 }}>
-              The whole journey is three stages. No hidden gates, no moving targets — just clear rules you can read in a minute.
+              Four simple steps from signup to earning profit splits. No hidden gates, no moving targets — just clear rules you can read in a minute.
             </p>
           </Reveal>
         </div>
@@ -34,8 +34,8 @@ export default function HowItWorksPage() {
                 <div className="ng-mono ng-grad" style={{ fontSize: "2.8rem", fontWeight: 600, lineHeight: 1 }}>{s.n}</div>
                 <div>
                   <div className="ng-eyebrow" style={{ marginBottom: 10 }}>{s.kicker}</div>
-                  <h2 style={{ fontSize: "1.7rem" }}>{s.title}</h2>
-                  <p className="ng-muted" style={{ marginTop: "0.8rem", fontSize: "1.08rem", lineHeight: 1.65 }}>{s.body}</p>
+                  <h2 style={{ fontSize: "1.5rem" }}>{s.title}</h2>
+                  <p className="ng-muted" style={{ marginTop: "0.8rem", fontSize: "1.05rem", lineHeight: 1.65 }}>{s.body}</p>
                 </div>
               </div>
             </Reveal>

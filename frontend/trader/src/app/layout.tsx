@@ -4,13 +4,13 @@ import { ThemeProvider, themeInitScript } from '@/lib/theme';
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 
 export const metadata: Metadata = {
-  title: 'NiveshGuru — Paper Trading',
+  title: 'FinLix Capital — Paper Trading',
   description: 'Practice trading Indian markets and prove your edge through structured evaluations.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'NiveshGuru',
+    title: 'FinLix Capital',
   },
   icons: {
     icon: [
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="NiveshGuru" />
+        <meta name="apple-mobile-web-app-title" content="FinLix Capital" />
         <meta name="mobile-web-app-capable" content="yes" />
         {/* Applied before React hydrates — prevents a white flash for dark-mode users */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />

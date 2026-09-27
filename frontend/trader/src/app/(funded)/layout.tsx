@@ -12,7 +12,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", displ
 export const metadata: Metadata = {
   title: { default: `${site.name} — ${site.tagline}`, template: `%s · ${site.name}` },
   description:
-    "Nivesh Guruji is a funded-trader programme for India. Pass a challenge, trade a simulated funded account up to ₹2 crore, and keep up to 90% of your performance — paid in INR within 24 hours.",
+    "FinLix Capital is India's premier prop trading evaluation platform. Prove your edge on simulated accounts, pass the challenge, and earn up to 80% profit splits — paid in INR within 24 hours.",
   metadataBase: new URL(`https://${site.domain}`),
   openGraph: { title: site.name, description: site.tagline, type: "website" },
 };

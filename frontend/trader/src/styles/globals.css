@@ -28,14 +28,14 @@
   --warn-soft: #FFFAEB;
   --info: #3B82F6;
 
-  /* Brand — NiveshGuru navy + teal (+ gold for highlights) */
-  --brand-navy: #0D2137;
-  --brand-teal: #2BA89A;
-  --brand-gold: #E9A31A;
-  --accent: #2BA89A;
-  --accent-hover: #239185;
-  --accent-soft: #E6F6F4;
-  --accent-ring: rgba(43, 168, 154, 0.18);
+  /* Brand — navy + gold accent (broker-style, Zerodha/Angel-inspired) */
+  --brand-navy: #1d2b4f;
+  --brand-teal: #00a170;
+  --brand-gold: #f0a51e;
+  --accent: #f0a51e;
+  --accent-hover: #d88f0b;
+  --accent-soft: #fff3d6;
+  --accent-ring: rgba(240, 165, 30, 0.18);
 
   /* Effects */
   --shadow-sm: 0 1px 2px rgba(15, 17, 20, 0.04);
@@ -76,13 +76,13 @@
   --warn-soft: #2A1F05;
   --info: #60A5FA;
 
-  --brand-navy: #0D2137;
-  --brand-teal: #2BA89A;
-  --brand-gold: #E9A31A;
-  --accent: #2BA89A;
-  --accent-hover: #3BC4B3;
-  --accent-soft: #102826;
-  --accent-ring: rgba(43, 168, 154, 0.28);
+  --brand-navy: #1d2b4f;
+  --brand-teal: #00a170;
+  --brand-gold: #f0a51e;
+  --accent: #f0a51e;
+  --accent-hover: #f5b940;
+  --accent-soft: #2a1f05;
+  --accent-ring: rgba(240, 165, 30, 0.28);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
@@ -374,7 +374,7 @@ html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__item {
   white-space: nowrap;
 }
 
-/* NiveshGuru wordmark / lockup */
+/* FinLix Capital wordmark / lockup */
 .ng-wordmark {
   font-weight: 700;
   font-size: 15px;

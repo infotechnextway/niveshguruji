@@ -1,0 +1,1 @@
+NestJS modular monolith (API + Engine processes), Next.js 14 frontend, Redis Pub/Sub event bus, MongoDB, Docker Compose + Nginx reverse proxy, GitHub Actions CI.

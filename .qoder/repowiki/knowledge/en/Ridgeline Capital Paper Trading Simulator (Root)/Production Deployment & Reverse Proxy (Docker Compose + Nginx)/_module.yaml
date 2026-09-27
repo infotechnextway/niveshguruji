@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: deploy_infra
+title: Production Deployment & Reverse Proxy (Docker Compose + Nginx)
+scope:
+    - deploy/
+source_files: []
+depends_on: []
+related_to: []

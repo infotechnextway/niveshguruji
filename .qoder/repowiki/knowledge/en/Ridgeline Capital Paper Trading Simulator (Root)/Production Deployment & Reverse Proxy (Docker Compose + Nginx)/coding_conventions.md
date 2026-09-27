@@ -1,0 +1,4 @@
+- Service configuration is parameterized exclusively through environment variables sourced from `.env`, with sensible defaults supplied inline (e.g. `${LOG_LEVEL:-info}`, `${SMS_PROVIDER:-console}`) rather than hard-coded values.
+- Each service declares a `healthcheck` and uses `restart: unless-stopped` to ensure self-healing container lifecycles.
+- Sensitive secrets (JWT keys, OTP pepper, payment and SMTP credentials) are kept out of source control and only referenced via `${VAR}` interpolation in compose and nginx configs.
+- Nginx routing separates concerns into `nginx.conf` (global http block, map directives, logging) and `site.conf` (per-domain server blocks, upstream definitions, location proxies).

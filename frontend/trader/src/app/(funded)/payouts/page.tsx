@@ -8,7 +8,7 @@ import { inr } from "@/lib/funded/format";
 
 export const metadata: Metadata = {
   title: "Payouts",
-  description: "See real INR payouts, average payout time, and how withdrawals work at Nivesh Guruji.",
+  description: "See real INR payouts, average payout time, and how withdrawals work at FinLix Capital.",
 };
 
 export default function PayoutsPage() {
@@ -23,7 +23,7 @@ export default function PayoutsPage() {
               We pay fast, and we pay in <span className="ng-grad">rupees.</span>
             </h1>
             <p className="ng-muted" style={{ marginTop: "1.4rem", fontSize: "1.15rem", lineHeight: 1.6 }}>
-              Approved withdrawals land in your Indian bank or UPI within 24 hours. Here's the proof, updated from the server.
+              Approved withdrawals land in your Indian bank or UPI within 24 hours. Eligible traders may receive performance-based payouts in accordance with the payout policy and applicable terms.
             </p>
           </Reveal>
         </div>
