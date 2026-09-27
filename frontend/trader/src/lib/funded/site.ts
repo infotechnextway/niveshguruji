@@ -48,56 +48,90 @@ export const models: {
   tagline: string;
   badge?: string;
 }[] = [
-  { id: "twoStep", name: "2-Step", tagline: "Classic evaluation, lowest fee." },
-  { id: "oneStep", name: "1-Step", tagline: "One target, then funded.", badge: "Popular" },
-  { id: "instant", name: "Instant", tagline: "Skip evaluation. Trade funded today." },
+  { id: "oneStep", name: "Step 1", tagline: "Phase 1 Program — single target, then funded.", badge: "Popular" },
+  { id: "twoStep", name: "Step 2", tagline: "Phase 1 + Phase 2 evaluation, lowest fee." },
+  { id: "instant", name: "Instant Funded", tagline: "Skip evaluation. Trade funded today." },
 ];
 
-// Featured funding programs (broker-style cards)
-export const fundingPrograms = [
+// ---- Challenge plans (content sourced from finlixcapital.com/services) ----
+export interface ChallengePlan {
+  id: string;
+  display: string;
+  full: string;
+  capitalLabel: string;
+  prices: Record<ModelId, number>;
+  profitTarget: Record<ModelId, string>;
+  minDays: Record<ModelId, string>;
+  dailyDrawdown: Record<ModelId, string>;
+  maxDrawdown: Record<ModelId, string>;
+}
+
+export const challengePlans: ChallengePlan[] = [
   {
-    capital: "₹5L",
-    capitalFull: "5 Lakh",
-    startingAt: 5999,
-    highlights: [
-      "5 Lakh Simulated Capital",
-      "Up to 80% Profit Split",
-      "No Time Limit",
-      "Daily Drawdown: 3%",
-      "Max Drawdown: 6%",
-    ],
-    popular: false,
+    id: "2L", display: "₹2L", full: "2 Lakh", capitalLabel: "2 Lakh",
+    prices: { oneStep: 4999, twoStep: 2999, instant: 8999 },
+    profitTarget: { oneStep: "16%", twoStep: "8% / 5%", instant: "—" },
+    minDays: { oneStep: "5", twoStep: "5", instant: "None" },
+    dailyDrawdown: { oneStep: "3%", twoStep: "3%", instant: "3%" },
+    maxDrawdown: { oneStep: "6%", twoStep: "6%", instant: "6%" },
   },
   {
-    capital: "₹25L",
-    capitalFull: "25 Lakh",
-    startingAt: 26999,
-    highlights: [
-      "25 Lakh Simulated Capital",
-      "Up to 80% Profit Split",
-      "No Time Limit",
-      "Daily Drawdown: 3%",
-      "Max Drawdown: 6%",
-      "Priority Support",
-    ],
-    popular: true,
+    id: "5L", display: "₹5L", full: "5 Lakh", capitalLabel: "5 Lakh",
+    prices: { oneStep: 11999, twoStep: 5999, instant: 15999 },
+    profitTarget: { oneStep: "15%", twoStep: "8% / 5%", instant: "—" },
+    minDays: { oneStep: "15", twoStep: "15", instant: "None" },
+    dailyDrawdown: { oneStep: "3%", twoStep: "3%", instant: "3%" },
+    maxDrawdown: { oneStep: "6%", twoStep: "6%", instant: "6%" },
   },
   {
-    capital: "₹1Cr",
-    capitalFull: "1 Crore",
-    startingAt: 104599,
-    highlights: [
-      "1 Crore Simulated Capital",
-      "Up to 80% Profit Split",
-      "No Time Limit",
-      "Daily Drawdown: 3%",
-      "Max Drawdown: 6%",
-      "Priority Support",
-      "Dedicated Account Manager",
-    ],
-    popular: false,
+    id: "10L", display: "₹10L", full: "10 Lakh", capitalLabel: "10 Lakh",
+    prices: { oneStep: 21999, twoStep: 10999, instant: 24999 },
+    profitTarget: { oneStep: "15%", twoStep: "8% / 5%", instant: "—" },
+    minDays: { oneStep: "15", twoStep: "15", instant: "None" },
+    dailyDrawdown: { oneStep: "3%", twoStep: "3%", instant: "3%" },
+    maxDrawdown: { oneStep: "6%", twoStep: "6%", instant: "6%" },
+  },
+  {
+    id: "25L", display: "₹25L", full: "25 Lakh", capitalLabel: "25 Lakh",
+    prices: { oneStep: 54999, twoStep: 26999, instant: 59999 },
+    profitTarget: { oneStep: "15%", twoStep: "8% / 5%", instant: "—" },
+    minDays: { oneStep: "15", twoStep: "15", instant: "None" },
+    dailyDrawdown: { oneStep: "3%", twoStep: "3%", instant: "3%" },
+    maxDrawdown: { oneStep: "6%", twoStep: "6%", instant: "6%" },
+  },
+  {
+    id: "50L", display: "₹50L", full: "50 Lakh", capitalLabel: "50 Lakh",
+    prices: { oneStep: 111999, twoStep: 54999, instant: 119999 },
+    profitTarget: { oneStep: "15%", twoStep: "8% / 5%", instant: "—" },
+    minDays: { oneStep: "15", twoStep: "15", instant: "None" },
+    dailyDrawdown: { oneStep: "3%", twoStep: "3%", instant: "3%" },
+    maxDrawdown: { oneStep: "6%", twoStep: "6%", instant: "6%" },
+  },
+  {
+    id: "1Cr", display: "₹1Cr", full: "1 Crore", capitalLabel: "1 Crore",
+    prices: { oneStep: 159999, twoStep: 79999, instant: 159999 },
+    profitTarget: { oneStep: "15%", twoStep: "8% / 5%", instant: "—" },
+    minDays: { oneStep: "15", twoStep: "15", instant: "None" },
+    dailyDrawdown: { oneStep: "3%", twoStep: "3%", instant: "3%" },
+    maxDrawdown: { oneStep: "6%", twoStep: "6%", instant: "6%" },
   },
 ];
+
+// Legacy accountSizes (kept for backwards compat with other pages)
+export const accountSizes: {
+  id: string;
+  display: string;
+  full: string;
+  prices: Record<ModelId, number>;
+}[] = challengePlans.map((p) => ({
+  id: p.id,
+  display: p.display,
+  full: `₹${p.full === "1 Crore" ? "1,00,00,000" : p.full === "2 Lakh" ? "2,00,000" : p.full === "5 Lakh" ? "5,00,000" : p.full === "10 Lakh" ? "10,00,000" : p.full === "25 Lakh" ? "25,00,000" : "50,00,000"}`,
+  prices: p.prices,
+}));
+
+// Legacy accountSizes alias
+export { challengePlans as fundingProgramsRaw };
 
 // Metric rows shown per model (label → value by model)
 export const metricRows: { label: string; values: Record<ModelId, string> }[] = [
@@ -116,20 +150,6 @@ export const rewardRows = [
   { label: "Weekend holding", value: "Allowed" },
   { label: "News trading", value: "Allowed" },
   { label: "EAs / algos", value: "Allowed" },
-];
-
-// ---- Account sizes & prices (INR, before discount) ----
-export const accountSizes: {
-  id: string;
-  display: string;
-  full: string;
-  prices: Record<ModelId, number>;
-}[] = [
-  { id: "5L", display: "₹5L", full: "₹5,00,000", prices: { instant: 8999, oneStep: 3499, twoStep: 2999 } },
-  { id: "10L", display: "₹10L", full: "₹10,00,000", prices: { instant: 15999, oneStep: 6499, twoStep: 5499 } },
-  { id: "25L", display: "₹25L", full: "₹25,00,000", prices: { instant: 34999, oneStep: 12999, twoStep: 10999 } },
-  { id: "50L", display: "₹50L", full: "₹50,00,000", prices: { instant: 59999, oneStep: 22999, twoStep: 19999 } },
-  { id: "1Cr", display: "₹1Cr", full: "₹1,00,00,000", prices: { instant: 99999, oneStep: 42999, twoStep: 36999 } },
 ];
 
 // ---- Live payouts marquee (illustrative) ----

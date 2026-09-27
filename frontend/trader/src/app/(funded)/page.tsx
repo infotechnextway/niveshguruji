@@ -7,8 +7,8 @@ import { PayoutMarquee } from "@/components/funded/PayoutMarquee";
 import { EquityCurve } from "@/components/funded/EquityCurve";
 import { ChallengeSelector } from "@/components/funded/ChallengeSelector";
 import { FaqList } from "@/components/funded/FaqList";
-import { heroStats, whyChoose, steps, fundingPrograms, topTraders, testimonials, site } from "@/lib/funded/site";
-import { inr } from "@/lib/funded/format";
+import { heroStats, whyChoose, steps, challengePlans, topTraders, testimonials, site } from "@/lib/funded/site";
+import { inr, discounted } from "@/lib/funded/format";
 
 const featureIcons = [Clock, Percent, ShieldCheck, LineChart];
 
@@ -152,26 +152,36 @@ export default function HomePage() {
             intro="Pick a program that matches your trading style. Pass the evaluation and trade with our capital."
           />
           <div className="ng-programs" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 22, marginTop: "3rem" }}>
-            {fundingPrograms.map((p, i) => (
-              <Reveal key={p.capital} delay={i * 0.08}>
+            {challengePlans.filter((p: typeof challengePlans[0]) => ["5L", "25L", "1Cr"].includes(p.id)).map((p: typeof challengePlans[0], i: number) => (
+              <Reveal key={p.id} delay={i * 0.08}>
                 <div className="ng-card ng-program" style={{ padding: "2rem", height: "100%", position: "relative", display: "flex", flexDirection: "column" }}>
-                  {p.popular && (
+                  {p.id === "25L" && (
                     <span style={{ position: "absolute", top: -12, right: 20, background: "var(--ng-gold)", color: "#fff", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 20, letterSpacing: "0.04em" }}>
                       MOST POPULAR
                     </span>
                   )}
-                  <div className="ng-mono" style={{ fontSize: "2.2rem", fontWeight: 700, color: "var(--ng-navy)" }}>{p.capital}</div>
-                  <div className="ng-muted" style={{ fontSize: "0.9rem", marginTop: 4 }}>{p.capitalFull} Simulated Capital</div>
+                  <div className="ng-mono" style={{ fontSize: "2.2rem", fontWeight: 700, color: "var(--ng-navy)" }}>{p.display}</div>
+                  <div className="ng-muted" style={{ fontSize: "0.9rem", marginTop: 4 }}>{p.full} Simulated Capital</div>
                   <div style={{ marginTop: "1.2rem", marginBottom: "1.2rem" }}>
                     <span className="ng-muted" style={{ fontSize: "0.82rem" }}>Starting at</span>
-                    <div className="ng-grad" style={{ fontSize: "1.6rem", fontWeight: 700 }}>{inr(p.startingAt)}</div>
+                    <div className="ng-grad" style={{ fontSize: "1.6rem", fontWeight: 700 }}>{inr(discounted(p.prices.oneStep))}</div>
                   </div>
                   <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10, flex: 1 }}>
-                    {p.highlights.map((h) => (
-                      <li key={h} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.95rem" }}>
-                        <span style={{ color: "var(--ng-teal)", flexShrink: 0 }}>✓</span> {h}
-                      </li>
-                    ))}
+                    <li style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.95rem" }}>
+                      <span style={{ color: "var(--ng-teal)", flexShrink: 0 }}>✓</span> {p.full} Simulated Capital
+                    </li>
+                    <li style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.95rem" }}>
+                      <span style={{ color: "var(--ng-teal)", flexShrink: 0 }}>✓</span> Up to 80% Profit Split
+                    </li>
+                    <li style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.95rem" }}>
+                      <span style={{ color: "var(--ng-teal)", flexShrink: 0 }}>✓</span> No Time Limit
+                    </li>
+                    <li style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.95rem" }}>
+                      <span style={{ color: "var(--ng-teal)", flexShrink: 0 }}>✓</span> Daily Drawdown: {p.dailyDrawdown.oneStep}
+                    </li>
+                    <li style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.95rem" }}>
+                      <span style={{ color: "var(--ng-teal)", flexShrink: 0 }}>✓</span> Max Drawdown: {p.maxDrawdown.oneStep}
+                    </li>
                   </ul>
                   <Link href="/challenges" className="ng-btn ng-btn-gold" style={{ marginTop: "1.5rem", justifyContent: "center", width: "100%" }}>
                     Start Challenge
