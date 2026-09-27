@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="NiveshGuru">
-  <!-- Mark: navy tile, teal bars, gold growth arrow -->
-  <rect width="512" height="512" rx="96" fill="#0D2137"/>
-  <rect x="118" y="280" width="72" height="120" rx="14" fill="#2BA89A"/>
-  <rect x="220" y="220" width="72" height="180" rx="14" fill="#2BA89A"/>
-  <rect x="322" y="148" width="72" height="252" rx="14" fill="#2BA89A"/>
-  <path d="M128 360 L360 150" stroke="#E9A31A" stroke-width="36" stroke-linecap="round"/>
-  <path d="M300 128 L400 128 L400 228 Z" fill="#E9A31A"/>
+  <!-- Mark: dark tile, gold bars, gold growth arrow -->
+  <rect width="512" height="512" rx="96" fill="#030712"/>
+  <rect x="118" y="280" width="72" height="120" rx="14" fill="#f0a51e"/>
+  <rect x="220" y="220" width="72" height="180" rx="14" fill="#f0a51e"/>
+  <rect x="322" y="148" width="72" height="252" rx="14" fill="#f0a51e"/>
+  <path d="M128 360 L360 150" stroke="#fbbf24" stroke-width="36" stroke-linecap="round"/>
+  <path d="M300 128 L400 128 L400 228 Z" fill="#fbbf24"/>
 </svg>

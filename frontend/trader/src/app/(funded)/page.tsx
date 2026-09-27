@@ -160,7 +160,7 @@ export default function HomePage() {
                       MOST POPULAR
                     </span>
                   )}
-                  <div className="ng-mono" style={{ fontSize: "2.2rem", fontWeight: 700, color: "var(--ng-navy)" }}>{p.display}</div>
+                  <div className="ng-mono" style={{ fontSize: "2.2rem", fontWeight: 700, color: "var(--ng-gold-dark)" }}>{p.display}</div>
                   <div className="ng-muted" style={{ fontSize: "0.9rem", marginTop: 4 }}>{p.full} Simulated Capital</div>
                   <div style={{ marginTop: "1.2rem", marginBottom: "1.2rem" }}>
                     <span className="ng-muted" style={{ fontSize: "0.82rem" }}>Starting at</span>
@@ -293,7 +293,7 @@ export default function HomePage() {
       </section>
 
       {/* ================= FINAL CTA ================= */}
-      <section style={{ position: "relative", overflow: "hidden", background: "var(--ng-navy)" }}>
+      <section style={{ position: "relative", overflow: "hidden", background: "var(--ng-bg-soft)" }}>
         <div
           className="ng-wrap"
           style={{ position: "relative", padding: "5.5rem 1.5rem", textAlign: "center" }}

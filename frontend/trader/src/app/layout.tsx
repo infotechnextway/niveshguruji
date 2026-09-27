@@ -14,17 +14,19 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: '/icons/icon-64.png', sizes: '64x64', type: 'image/png' },
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
     apple: [{ url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }],
+    shortcut: '/icons/icon-64.png',
   },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#2BA89A' },
-    { media: '(prefers-color-scheme: dark)', color: '#2BA89A' },
+    { media: '(prefers-color-scheme: light)', color: '#f0a51e' },
+    { media: '(prefers-color-scheme: dark)', color: '#030712' },
   ],
 };
 

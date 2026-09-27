@@ -122,7 +122,7 @@ function AdminLoginForm() {
           min-height: 100vh;
           display: grid;
           place-items: center;
-          background: var(--bg);
+          background: #030712;
           padding: 16px;
           position: relative;
           overflow-x: hidden;
@@ -137,6 +137,10 @@ function AdminLoginForm() {
           flex-direction: column;
           gap: 16px;
           min-width: 0;
+          background: rgba(10,22,40,0.55);
+          border: 1px solid rgba(240,165,30,0.15);
+          border-radius: 16px;
+          backdrop-filter: blur(8px);
         }
         .alp-brand {
           display: flex;
@@ -165,18 +169,23 @@ function AdminLoginForm() {
           font-size: 10px; color: var(--text-dim);
           text-transform: uppercase; letter-spacing: 0.06em;
         }
-        .alp-title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+        .alp-title { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; color: #f1f5f9; }
         .lbl {
-          font-size: 11px; color: var(--text-dim);
+          font-size: 11px; color: rgba(148,163,184,0.7);
           text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500;
         }
         .err {
           padding: 8px 12px;
-          background: var(--loss-soft);
-          color: var(--loss);
+          background: rgba(239,68,68,0.12);
+          color: #ef4444;
           border-radius: var(--r);
           font-size: 12px;
         }
+        .alp-card .input { background: rgba(3,7,18,0.6); border-color: rgba(240,165,30,0.12); color: #f1f5f9; }
+        .alp-card .input::placeholder { color: rgba(100,116,139,0.5); }
+        .alp-card .input:focus { border-color: #f0a51e; box-shadow: 0 0 0 3px rgba(240,165,30,0.18); }
+        .alp-card .dim { color: rgba(148,163,184,0.6); }
+        .alp-card .btn-primary { background: linear-gradient(135deg, #f0a51e, #fbbf24); color: #030712; font-weight: 600; }
         @media (max-width: 420px) {
           .alp { padding: 12px; align-items: start; padding-top: 56px; }
           .alp-card { padding: 20px 16px; }

@@ -365,7 +365,7 @@ html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__item {
 }
 .pts-sidebar__brand-name .ng-wordmark__nivesh { color: var(--brand-navy); }
 [data-theme="dark"] .pts-sidebar__brand-name .ng-wordmark__nivesh { color: var(--text); }
-.pts-sidebar__brand-name .ng-wordmark__guru { color: var(--brand-teal); }
+.pts-sidebar__brand-name .ng-wordmark__guru { color: var(--brand-gold); }
 .pts-sidebar__brand-sub {
   font-weight: 500;
   font-size: 9px;
@@ -384,7 +384,7 @@ html[data-sidebar='collapsed'] .pts-shell__sidebar--desktop .pts-sidebar__item {
 .ng-wordmark--compact { font-size: 12px; letter-spacing: 0.08em; }
 .ng-wordmark__nivesh { color: var(--brand-navy); }
 [data-theme="dark"] .ng-wordmark__nivesh { color: var(--text); }
-.ng-wordmark__guru { color: var(--brand-teal); }
+.ng-wordmark__guru { color: var(--brand-gold); }
 .ng-lockup {
   display: flex;
   align-items: center;
